@@ -1,0 +1,110 @@
+<div class="m-subheader ">
+	<div class="d-flex align-items-center">
+		<div class="mr-auto">
+			<h3 class="m-subheader__title m-subheader__title--separator">
+				Mobil Slider İşlemleri
+			</h3>
+			<ul class="m-subheader__breadcrumbs m-nav m-nav--inline">
+				<li class="m-nav__item m-nav__item--home">
+					<a href="<?=admin_url()?>" class="m-nav__link m-nav__link--icon">
+						<i class="m-nav__link-icon la la-home"></i>
+					</a>
+				</li>
+				<li class="m-nav__separator">
+					-
+				</li>
+				<li class="m-nav__item">
+					<a href="<?=admin_url('Slider')?>" class="m-nav__link">
+						<span class="m-nav__link-text">
+							Slider
+						</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+<div class="m-content">
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="m-portlet">
+				<form class="m-form m-form--fit m-form--label-align-right" action="<?=admin_url('Slider/editMobileSlider/'.$mobileSliderInfo->Id)?>" method="POST">
+					<div class="m-portlet__body">
+						<div class="m-form__section m-form__section--first">
+						<? 
+						if ($this->session->flashdata('onay') == 1){?>
+							<div class="alert alert-success alert-dismissible fade show" style="margin-left: 20px;margin-right: 20px" role="alert">
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close"></button>
+							<strong>
+								Tebrikler!
+							</strong>
+								Mobile Slider Güncellendi
+							</div>
+						<?}elseif($this->session->flashdata('hata')==1){?>
+							<div class="alert alert-danger alert-dismissible fade show" style="margin-left: 20px;margin-right: 20px" role="alert">
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close"></button>
+							<strong>
+								Sorun
+							</strong>
+								Mobile Slider Güncellenemedi
+							</div>
+						<?}?>
+							<div class="form-group m-form__group">
+								<label>
+									Sıra
+								</label>
+								<input type="number" class="form-control m-input" name="sort" value="<?=$mobileSliderInfo->sort?>" required="true">
+							</div>
+							<div class="form-group m-form__group">
+								<label>
+									Link
+								</label>
+								<input type="text" class="form-control m-input" name="slider_redirect" value="<?=$mobileSliderInfo->slider_redirect?>" required="true">
+							</div>
+							<div class="form-group m-form__group">
+								<label>
+									Dil
+								</label>
+								<select class="form-control" name="lang_id">
+									<?php foreach ($langs as $val): ?>
+									<option value="<?=$val->id?>" <?=($val->id==$mobileSliderInfo->lang_id)?'selected':''?>><?=$val->lang_name?></option>
+									<?php endforeach ?>
+								</select>
+							</div>
+							<div class="col-12 m--padding-left-30 m--padding-right-30">
+								<label>
+									Resim
+								</label>
+								<div class="m-dropzone dropzone m-dropzone--primary dz-clickable" action="<?=site_url('Admin/Slider/ImageUpload/')?>" id="m-dropzone-one">
+									<div class="m-dropzone__msg dz-message needsclick">
+										<h3 class="m-dropzone__msg-title">
+											Resim Yükle
+										</h3>
+										<span class="m-dropzone__msg-desc">
+											<i class="fa fa-picture-o"></i>
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="m-portlet__foot m-portlet__foot--fit">
+						<div class="m-form__actions m-form__actions">
+							<div class="row">
+								<div class="col-lg-6"></div>
+								<div class="col-lg-6 text-right">
+									<button type="submit" class="btn btn-primary">
+										Güncelle
+									</button>
+									<button type="reset" class="btn btn-secondary" onclick="window.location='<?=admin_url('Slider/sliderImage')?>'">
+										İptal
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

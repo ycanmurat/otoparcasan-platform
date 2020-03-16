@@ -1,0 +1,6 @@
+{
+    "require": {
+        "phpmailer/phpmailer": "^6.0",
+        "socialconnect/auth": "^2.2"
+    }
+}

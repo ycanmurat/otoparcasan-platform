@@ -1,0 +1,40 @@
+.m-messenger .m-messenger__messages .m-messenger__message, .m-messenger .m-messenger__messages .m-messenger__message {
+    float: none !important;
+}
+.m-messenger .m-messenger__messages .m-messenger__message.m-messenger__message--in .m-messenger__message-body {
+	float: left;
+}
+.m-messenger .m-messenger__messages .m-messenger__message.m-messenger__message--out {
+	width: 100%;
+}
+.m-messenger .m-messenger__messages .m-messenger__message.m-messenger__message--out .m-messenger__message-body {
+	float: right;
+	max-width: 600px;
+}
+.m-messenger .m-messenger__messages .m-messenger__message.m-messenger__message--out .m-messenger__message-content .m-messenger__message-text {
+	font-weight: 400px;
+}
+.my_messenger_text button.close {
+	opacity: 1;
+    position: absolute;
+    z-index: 9;
+    right: 0;
+    top: 0;
+}
+.table-detail thead th {
+	font-size: 12px !important;
+}
+.table-detail tbody td {
+	font-size: 12px !important;
+	font-weight: 400;
+}
+.order_detail .order_row {
+	margin-left: 0px;
+	padding-left: 15px;
+}
+.order-box {
+	border-bottom: 0.1rem dashed #ebedf2 !important;
+}
+.product-box {
+	margin-bottom: 15px;
+}

@@ -1,0 +1,16 @@
+.env
+vendor/
+node_modules/
+storefront/application/logs/*
+!storefront/application/logs/index.html
+storefront/application/cache/*
+!storefront/application/cache/index.html
+storefront/assets/uploads/
+# Metronic is a commercial theme: drop your licensed copy here, only custom.css is versioned
+storefront/assets/theme/*
+!storefront/assets/theme/assets/
+storefront/assets/theme/assets/*
+!storefront/assets/theme/assets/css/
+storefront/assets/theme/assets/css/*
+!storefront/assets/theme/assets/css/custom.css
+.DS_Store
