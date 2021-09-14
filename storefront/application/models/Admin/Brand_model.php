@@ -18,6 +18,7 @@ class Brand_model extends Core_Model
 		$this->db->where(array('deleted'=>0));
 		$this->db->order_by('category','ASC');
 		$this->db->order_by('sort','ASC');
+		$this->db->where('category',1);
 		$returnQuery = $this->db->get();
 		if ($returnQuery->num_rows() > 0) {
 			return $returnQuery->result();
@@ -29,16 +30,6 @@ class Brand_model extends Core_Model
 	public function SetStatus($id,$new)
 	{
 		return $this->db->set(array('status'=>$new))->where(array('id'=>$id))->update('brands');
-	}
-
-	public function imageMust($sort)
-	{
-		foreach ($sort as $key => $val) {
-			$this->db->where(array('id' => $key));
-			$this->db->set(array('sort' => $val));
-			$this->db->update('brands');
-		}
-		return true;
 	}
 
 	public function delete($id)
@@ -93,5 +84,10 @@ class Brand_model extends Core_Model
 	public function updateBrand($getAllPosts,$id)
 	{
 		return $this->db->set($getAllPosts)->where(array('id'=>$id))->update('brands');
+	}
+
+	public function updateSort($update_array)
+	{
+		return $this->db->update_batch('brands', $update_array, 'id');
 	}
 }

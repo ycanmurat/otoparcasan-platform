@@ -8,9 +8,36 @@ class Dat_model extends Core_Model
 		$this->load->model('Admin/Agac_model');
 	}
 
+	public function tokenRefresh()
+	{
+		$client = new SoapClient(
+		    null,
+		    array(
+		        'location' => 'http://www.dat.de/SparePartRequest/services/Authentication?wsdl',
+		        'uri' => 'http://www.dat.de/SparePartRequest/services/Authentication?wsdl',
+		        'trace' => 1,
+		        'use' => SOAP_LITERAL,
+		    )
+		);
+
+		$params = new \SoapVar("
+		<request>
+			<customerLogin>".getenv('DAT_CUSTOMER_LOGIN')."</customerLogin>
+			<customerNumber>".getenv('DAT_CUSTOMER_NUMBER')."</customerNumber>
+			<customerSignature>".getenv('DAT_CUSTOMER_SIGNATURE')."</customerSignature>
+			<interfacePartnerNumber>".getenv('DAT_PARTNER_NUMBER')."</interfacePartnerNumber>
+			<interfacePartnerSignature>".getenv('DAT_PARTNER_SIGNATURE')."</interfacePartnerSignature>
+			<productVariant></productVariant>
+		</request>
+		", XSD_ANYXML);
+		$result = $client->doLogin($params);
+
+		$this->session->set_userdata('datToken',$result);
+		return $result;
+	}
+
 	public function getToken()
 	{
-		
 		if (!($this->session->userdata('datToken')) || $this->session->userdata('datToken') == '') {
 			$client = new SoapClient(
 			    null,
@@ -38,7 +65,6 @@ class Dat_model extends Core_Model
 			return $result;
 		}
 		else{
-			//prex($this->session->userdata('datToken'));
 			return $this->session->userdata('datToken');
 		}
 	}
@@ -54,9 +80,10 @@ class Dat_model extends Core_Model
 
 	public function getCarMarks()
 	{
-		$ary = array('carType' => 0);
-		$q = $this->Agac_model->get($ary,1);
-
+        /*
+    		$ary = array('carType' => 0);
+    		$q = $this->Agac_model->get($ary,1);
+        */
 		$datToken = $this->getToken();
 		$loginData = $this->getLoginData();
 
@@ -91,14 +118,13 @@ class Dat_model extends Core_Model
 
 
 		//Soap Method Call
-		$client->getVehicleTypes($params);
+		$rq = $client->getVehicleTypes($params);
 		$response 	= $client->__getLastResponse();
 
 		$response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
 		$xml = new SimpleXMLElement($response);
 		$body = $xml->xpath('//SBody')[0];
-		$lastResult = json_decode(json_encode((array)$body), TRUE); 
-
+		$lastResult = json_decode(json_encode((array)$body), TRUE);
 		$result = array();
 		foreach ($lastResult as $key => $val) {
 			foreach ($val as $key2 => $val2) {
@@ -108,25 +134,35 @@ class Dat_model extends Core_Model
 			}
 		}
 
+        /*
+		$newArray = [];
+		foreach ($result as $key => $val) {
+            $i = 0;
+            foreach ($q as $key2 => $val2) {
+                if ($val['key'] == $val2->key) {
+                    $newArray[] = $val2;
+                    $i++;
+                }
+            }
+            if ($i == 0) {
+                $newArray[] = (object)array('name'      => $val['value'],
+                                            'orjisim'   => $val['value'],
+                                            'key'       => $val['key'],
+                                            'popilar'   => 0,
+                                            'status'    => 1);
+            }
+		}*/
 
-		if ($q != false) {
-			$newArray = [];
-			foreach ($q as $key => $val) {
-				if (array_key_exists($key,$result)) {
-					$newArray[] = $val;
-				}
-			}
-
-			return $newArray;
-		}else{
-			return $result;
-		}
+        //return $newArray;
+		return $result;
 	}
 
 	public function getBrands($type,$year= '')
 	{
+        /*
 		$ary = array('carType' => $type,'carBrands' => '');
 		$q = $this->Agac_model->get($ary,1);
+        */
 		$datToken = $this->getToken();
 		$loginData = $this->getLoginData();
 
@@ -170,6 +206,8 @@ class Dat_model extends Core_Model
 		$response 	= $client->__getLastResponse();
 		//prex($client->__getLastRequest());
 
+        //prex($client->__getLastRequest());
+
 		$response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
 		$xml = new SimpleXMLElement($response);
 		$body = $xml->xpath('//SBody')[0];
@@ -184,7 +222,7 @@ class Dat_model extends Core_Model
 			}
 		}
 
-
+        /*
 		if ($q != false) {
 			$newArray = [];
 			foreach ($q as $key => $val) {
@@ -195,14 +233,17 @@ class Dat_model extends Core_Model
 
 			return $newArray;
 		}else{
+          */
 			return $result;
-		}
+		//}
 	}
 
 	public function getModels($type,$brand,$year= '')
 	{
+        /*
 		$ary = array('carType' => $type,'carBrands' => $brand ,'carModels' => '');
 		$q = $this->Agac_model->get($ary,1);
+        */
 		//prex($q);
 
 		$datToken = $this->getToken();
@@ -247,7 +288,7 @@ class Dat_model extends Core_Model
 		//prex($params);
 
 		//Soap Method Call
-		$client->getBaseModels($params);
+		$qws = $client->getBaseModels($params);
 		$response 	= $client->__getLastResponse();
 		//prex($client->__getLastRequest());
 
@@ -259,14 +300,19 @@ class Dat_model extends Core_Model
 		$result = array();
 		foreach ($lastResult as $key => $val) {
 			foreach ($val as $key2 => $val2) {
-				foreach ($val2 as $key3 => $val3) {
-					$result[] = ($val3['@attributes']);
-				}
+                if (isset($val2['@attributes'])) {
+                    $result[] = $val2['@attributes'];
+                }else{
+                    foreach ($val2 as $key3 => $val3) {
+                        $result[] = ($val3['@attributes']);
+                    }
+                }
 			}
 		}
+        //prex($result);
 
 		
-
+        /*
 		if ($q != false) {
 			$newArray = [];
 			foreach ($q as $key => $val) {
@@ -282,20 +328,75 @@ class Dat_model extends Core_Model
 			});
 			return $newArray;
 		}else{
-
+    */
 			usort($result, function($a, $b) {
 			    return $a['value'] <=> $b['value'];
 			});
 			return $result;
-		}
+		//}
 	}
+
+    public function getImage($datEcode,$aspect)
+    {
+        ini_set('default_socket_timeout', 6000);
+        $datToken = $this->getToken();
+        $loginData = $this->getLoginData();
+
+        $client = new SoapClient(
+            null,
+            array(
+                'location' => 'https://www.dat.de/VehicleRepairOnline/services/VehicleImagery?wsdl',
+                'uri' => 'https://www.dat.de/VehicleRepairOnline/services/VehicleImagery?wsdl',
+                'stream_context' => stream_context_create(
+                    array(
+                        'http' => array(
+                            'protocol_version' => 1.0,
+                        ),
+                    )
+                ),
+            )
+        );
+
+        $headerVar = new SoapVar($loginData,XSD_ANYXML);
+        $header = new SoapHeader('http://tempuri.org/','RequestParams',$headerVar);
+        $client->__setSoapHeaders($header);
+
+        $soapVar = '
+        <request>
+            <aspect>'.$aspect.'</aspect>
+            <datECode>'.$datEcode.'</datECode>
+            <imageType>PICTURE</imageType>
+        </request>';
+        
+        $params = new \SoapVar($soapVar, XSD_ANYXML);
+        try {
+            $response = $client->getVehicleImagesN($params);
+            if (is_array($response->images)) {
+                $image = ($response->images[0]->imageBase64);
+            }else{
+                $image = ($response->images->imageBase64);
+            }
+            if (isset($image)) {
+                $data = 'data:image/png;base64,'.$image;
+                list($type, $data) = explode(';', $data);
+                list(, $data)      = explode(',', $data);
+                $data = base64_decode($data);
+                file_put_contents('/home/otoparcasan/public_html/assets/cars/'.$datEcode.'-'.$aspect.'.png', $data);
+                return 'assets/cars/'.$datEcode.'-'.$aspect.'.png';
+            }
+            return false;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
 
 
 	public function getSubModels($type,$brand,$model,$year = '')
 	{
+        /*
 		$ary = array('carType' => $type,'carBrands' => $brand ,'carModels' => $model);
 		$q = $this->Agac_model->get($ary,1);
-
+    */
 		$datToken = $this->getToken();
 		$loginData = $this->getLoginData();
 		//prex($datToken);
@@ -348,6 +449,7 @@ class Dat_model extends Core_Model
 		$body = $xml->xpath('//SBody')[0];
 		$lastResult = json_decode(json_encode((array)$body), TRUE); 
 		$result = array();
+        
 		foreach ($lastResult as $key => $val) {
 			foreach ($val as $key2 => $val2) {
 				if (count($val2) == 1) {
@@ -359,8 +461,7 @@ class Dat_model extends Core_Model
 				}
 			}
 		}
-
-
+        /*
 		if ($q != false) {
 			$newArray = [];
 			foreach ($q as $key => $val) {
@@ -376,12 +477,12 @@ class Dat_model extends Core_Model
 			});
 			return $newArray;
 		}else{
-			
+			*/
 			usort($result, function($a, $b) {
 			    return $a['value'] <=> $b['value'];
 			});
 			return $result;
-		}
+		//}
 	}
 
 	public function getOptions($type,$brand,$model,$subModel,$year='')
@@ -394,8 +495,15 @@ class Dat_model extends Core_Model
 			$data->equipment = $this->getCarEquipment($type,$brand,$model,$subModel,'',$year);
 		}
 		catch (exception $e) {
-		    //code to handle the exception
+		    
 		}
+        try {
+            $data->wheel = $this->getWheel($type,$brand,$model,$subModel,'',$year);
+            $data->typeOfDrive = $this->getTypeOfDrive($type,$brand,$model,$subModel,'',$year);
+        }
+        catch (exception $e) {
+
+        }
 
 		return $data;
 	}
@@ -405,7 +513,6 @@ class Dat_model extends Core_Model
 		$datToken = $this->getToken();
 		$loginData = $this->getLoginData();
 		//prex($datToken);
-
 
 		$client = new SoapClient(
 		    null,
@@ -449,7 +556,8 @@ class Dat_model extends Core_Model
 
 		$params = new \SoapVar($soapVar, XSD_ANYXML);
 		//Soap Body End
-
+        //pre($header);
+        //prex($params);
 
 		//Soap Method Call
 		$client->getEngineOptions($params);
@@ -728,53 +836,64 @@ class Dat_model extends Core_Model
 
 		if ($postData->name == 'car_engine') {
 			$data->gear 	= $this->getGear($postData->type,$postData->brand,$postData->model,$postData->subModel,$postData->selected,$postData->year);
-
-			/*
-			try {
-				$data->equipment = $this->getCarEquipment($type,$brand,$model,$subModel,$id);
-			}
-			catch (exception $e) {
-			    //code to handle the exception
-			}
-			*/
 		}else if ($postData->name == 'car_gear') {
 			$selectedOptions = array($postData->selected);
 			if ($postData->engine_selected != 0) {
 				$selectedOptions[] = $postData->engine_selected;
 			}
 			$data->body 	= $this->getCarBody($postData->type,$postData->brand,$postData->model,$postData->subModel,$selectedOptions,$postData->year);
-			
-			/*
-			try {
-				$data->equipment = $this->getCarEquipment($type,$brand,$model,$subModel,$id);
-			}
-			catch (exception $e) {
-			    //code to handle the exception
-			}
-			*/
 		}else if ($postData->name == 'car_body') {
-				$selectedOptions = array($postData->selected);
-				if ($postData->engine_selected != 0) {
-					$selectedOptions[] = $postData->engine_selected;
-				}
-				if ($postData->gear_selected != 0) {
-					$selectedOptions[] = $postData->gear_selected;
-				}
-				$data->equipment = $this->getCarEquipment($postData->type,$postData->brand,$postData->model,$postData->subModel,$selectedOptions,$postData->year);
-			
-			/*
-			try {
-				$data->equipment = $this->getCarEquipment($type,$brand,$model,$subModel,$id);
-			}
-			catch (exception $e) {
-			    //code to handle the exception
-			}
-			*/
-		}else{
+            try {
+                 $selectedOptions = array($postData->selected);
+                if ($postData->engine_selected != 0) {
+                    $selectedOptions[] = $postData->engine_selected;
+                }
+                if ($postData->gear_selected != 0) {
+                    $selectedOptions[] = $postData->gear_selected;
+                }
+                $data->equipment = $this->getCarEquipment($postData->type,$postData->brand,$postData->model,$postData->subModel,$selectedOptions,$postData->year);
+            } catch (Exception $e) {
+                $selectedOptions = array($postData->selected);
+                if ($postData->engine_selected != 0) {
+                    $selectedOptions[] = $postData->engine_selected;
+                }
+                if ($postData->gear_selected != 0) {
+                    $selectedOptions[] = $postData->gear_selected;
+                }
+                $data->wheel = $this->getWheel($postData->type,$postData->brand,$postData->model,$postData->subModel,$selectedOptions,$postData->year);
+            }
+        }else if ($postData->name == 'car_equipment') {
+                $selectedOptions = array($postData->selected);
+                if ($postData->engine_selected != 0) {
+                    $selectedOptions[] = $postData->engine_selected;
+                }
+                if ($postData->gear_selected != 0) {
+                    $selectedOptions[] = $postData->gear_selected;
+                }
+                if ($postData->body_selected != 0) {
+                    $selectedOptions[] = $postData->body_selected;
+                }
+                $data->wheel = $this->getWheel($postData->type,$postData->brand,$postData->model,$postData->subModel,$selectedOptions,$postData->year);
+        }else if ($postData->name == 'car_wheel') {
+                $selectedOptions = array($postData->selected);
+                if ($postData->engine_selected != 0) {
+                    $selectedOptions[] = $postData->engine_selected;
+                }
+                if ($postData->gear_selected != 0) {
+                    $selectedOptions[] = $postData->gear_selected;
+                }
+                if ($postData->body_selected != 0) {
+                    $selectedOptions[] = $postData->body_selected;
+                }
+                if (isset($postData->equipment_selected)) {
+                    if ($postData->equipment_selected != 0) {
+                        $selectedOptions[] = $postData->equipment_selected;
+                    }
+                }
+                $data->typeOfDrive = $this->getTypeOfDrive($postData->type,$postData->brand,$postData->model,$postData->subModel,$selectedOptions,$postData->year);
+        }else{
 
 		}
-		
-
 		return $data;
 	}
 
@@ -782,12 +901,10 @@ class Dat_model extends Core_Model
 	{
 		$datToken = $this->getToken();
 		$loginData = $this->getLoginData();
-		//prex($datToken);
 
 		if (!isset($data->year)) {
 			$data->year = '';
 		}
-
 
 		$client = new SoapClient(
 		    null,
@@ -828,15 +945,34 @@ class Dat_model extends Core_Model
         if (isset($data->equipment)) {
             $xmlParams .= '<selectedOptions>'.$data->equipment.'</selectedOptions>';
         }
+        if (isset($data->wheel)) {
+            $xmlParams .= '<selectedOptions>'.$data->wheel.'</selectedOptions>';
+        }
+        if (isset($data->typeofdrive)) {
+            $xmlParams .= '<selectedOptions>'.$data->typeofdrive.'</selectedOptions>';
+        }
         $xmlParams .= '</request>';
         
-        //prex($loginData);
+        //pre($loginData);
 		$params = new \SoapVar($xmlParams, XSD_ANYXML);
 		//prex($params);
 		//Soap Body End
 
 		//Soap Method Call
 		$response = $client->compileDatECode($params);
+        $carSelectDetail = array('type'         => $data->type ?? ''
+                                ,'brand'        => $data->brand ?? ''
+                                ,'model'        => $data->model ?? ''
+                                ,'subModel'     => $data->subModel ?? ''
+                                ,'engine'       => $data->engine ?? ''
+                                ,'gear'         => $data->gear ?? ''
+                                ,'body'         => $data->body ?? ''
+                                ,'equipment'    => $data->equipment ?? ''
+                                ,'wheel'        => $data->wheel ?? ''
+                                ,'typeofdrive'  => $data->typeofdrive ?? ''
+                                ,'carId'        => $response
+                            );
+        $this->db->insert('carDetail',$carSelectDetail);
 		$lst = $this->getConsTime($response,$data->year);
 		
 		/*
@@ -850,7 +986,7 @@ class Dat_model extends Core_Model
 		return array('carId' => $response, 'ConsTime' => $lst);
 	}
 
-	public function getConsTime($carId,$year)
+	public function getConsTime($carId,$year = '')
 	{
 		$datToken = $this->getToken();
 		$loginData = $this->getLoginData();
@@ -973,12 +1109,20 @@ class Dat_model extends Core_Model
 
 	public function getCarDetail($data)
 	{
-		$this->db->select('detail');
+		$this->db->select('detail,image');
 		$this->db->where((array)$data);
 		$q = $this->db->get('datCarDetail');
 		
 		if ($q->num_rows()>0) {
-			return json_decode($q->row()->detail);
+            $q = $q->row();
+            $returnData = $q->detail;
+            $returnData = json_decode($returnData);
+            $returnData->image = $q->image;
+            if (is_null($returnData->image)) {
+                $returnData->image = 'assets/Front/images/resmi_olmayan_araclar.png';
+            }
+
+			return $returnData;
 		}else{
 			$datToken = $this->getToken();
 			$loginData = $this->getLoginData();
@@ -1016,10 +1160,18 @@ class Dat_model extends Core_Model
 			//Soap Method Call
 			$q = $client->getVehicleData($params);
 			$data->detail = json_encode($q);
+            
+            $data->image = $this->getImage($data->carId,'ANGULARFRONT');
+            if ($data->image == false) {
+                unset($data->image);
+                $q->image = 'assets/Front/images/resmi_olmayan_araclar.png';
+            }else{
+                $q->image = $data->image;
+            }
 
-			$this->db->set($data);
-			$this->db->insert('datCarDetail');
-			
+            $this->db->set($data);
+            $this->db->insert('datCarDetail');
+
 			return $q;
 		}
 	}
@@ -1174,8 +1326,6 @@ class Dat_model extends Core_Model
 
 	public function getOem($dvns,$datCarId,$consTime)
 	{
-		
-		
 		$datToken = $this->getToken();
 		$loginData = $this->getLoginData();
 		//prex($datToken);
@@ -1221,6 +1371,10 @@ class Dat_model extends Core_Model
 			pre($params);
 			prex($client);
 		*/
+			
+		//pre($headerParam);
+		//prex($xmlParams);
+		
 			try {
 				$q = $client->getExtPartNoInfoByFullVehicleAndIntPartNo($params);
 			} catch (Exception $e) {
@@ -1236,17 +1390,6 @@ class Dat_model extends Core_Model
 		if (strlen(trim($vin)) != 17) {
 			return false;
 		}
-
-		$newVin = substr($vin, 0,9);
-
-		$this->db->where(array('vin' => $newVin));
-		$q = $this->db->get('vin_cache');
-		if ($q->num_rows() > 0) {
-			$q = $q->row();
-			return json_decode($q->detail);
-		}
-
-
 
 		$datToken = $this->getToken();
 		$loginData = $this->getLoginData();
@@ -1281,89 +1424,96 @@ class Dat_model extends Core_Model
             <locale country="tr" datCountryIndicator="tr" language="tr"/>
             <sessionID>'.$datToken.'</sessionID>
 			<coverage>ALL</coverage>
-            <restriction>ALL</restriction>
+            <restriction>REPAIR</restriction>
             <vin>'.$vin.'</vin>';
 		$soapVar .= '</request>';
 		$params = new \SoapVar($soapVar, XSD_ANYXML);
 		//Soap Body End
 
-		//pre($headerParam);
-		//prex($soapVar);
-
-
 		//Soap Method Call
-		$client->getVehicleIdentificationByVin($params);
-		$response 	= $client->__getLastResponse();
-		//prex($client->__getLastRequest());
+        try {
+            $lastResult = $client->getVehicleIdentificationByVin($params);
+        } catch (\SoapFault $fault) {
+            if ($fault->faultcode == 'dat:dat:Server.valueNotFound') {
+                $falut = str_replace('ECode not found', '', $fault->faultstring);
 
-
-		$response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
-		$xml = new SimpleXMLElement($response);
-		$body = $xml->xpath('//SBody')[0];
-		$lastResult = json_decode(json_encode((array)$body), TRUE); 
-
-		//prex(($lastResult));
+                $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", trim($falut));
+                $fault = new SimpleXMLElement($response);
+                $fault = (object)(array)$fault->ns2Vehicle;
+                return array('status' => 'fault','faultCode'=> 'Ecode','data' => $fault);
+            }elseif ($fault->faultactor == 'BackEnd.Authentication') {
+                return array('status' => 'fault','faultCode' => 'Authentication');
+            }else{
+                prex($fault);
+            }
+            //prex($fault->faultcode);
+        }
 
 		$result = array();
-		foreach ($lastResult as $key => $val) {
-			foreach ($val as $key2 => $val2) {
-				foreach ($val2 as $key3 => $val3) {
-					foreach ($val3 as $key4 => $val4) {
-						
-						$result[] = array('ns1DatECode' => $val4['ns1Vehicle']['ns1DatECode'] ?? '' , 
-										  'ns1ConstructionTimeFrom' => $val4['ns1Vehicle']['ns1ConstructionTimeFrom'] ?? '' ,
-										  'ns1ConstructionTimeTo' => $val4['ns1Vehicle']['ns1ConstructionTimeTo'] ?? '' ,
-										  'ns1ManufacturerName' => $val4['ns1Vehicle']['ns1ManufacturerName'] ?? '' ,
-										  'ns1ContainerName' => $val4['ns1Vehicle']['ns1ContainerName'] ?? '' ,
-										  'ns1BaseModelName' => $val4['ns1Vehicle']['ns1BaseModelName'] ?? '' ,
-										  'ns1SubModelName' => $val4['ns1Vehicle']['ns1SubModelName'] ?? '' ,
-										  'ns1VehicleType' => $val4['ns1Vehicle']['ns1VehicleType'] ?? '' ,
-										  'ns1Manufacturer' => $val4['ns1Vehicle']['ns1Manufacturer'] ?? '' ,
-										  'ns1BaseModel' => $val4['ns1Vehicle']['ns1BaseModel'] ?? '' ,
-										  'ns1SubModel' => $val4['ns1Vehicle']['ns1SubModel'] ?? '' ,
-										  'equipment' => $val4['ns1Vehicle']['ns1DATECodeEquipment']['ns1EquipmentPosition'] ?? '' ,
-										);
+        if (is_object($lastResult->Dossier)) {
+                $result[] = array('DatECode'             => $lastResult->Dossier->Vehicle->DatECode ?? '' , 
+                                  'ConstructionTimeFrom' => $lastResult->Dossier->Vehicle->ConstructionTimeFrom ?? '' ,
+                                  'ConstructionTimeTo'   => $lastResult->Dossier->Vehicle->ConstructionTimeTo ?? '' ,
+                                  'ManufacturerName'     => $lastResult->Dossier->Vehicle->ManufacturerName ?? '' ,
+                                  'ContainerName'        => $lastResult->Dossier->Vehicle->ContainerName ?? '' ,
+                                  'BaseModelName'        => $lastResult->Dossier->Vehicle->BaseModelName ?? '' ,
+                                  'SubModelName'         => $lastResult->Dossier->Vehicle->SubModelName ?? '' ,
+                                  'VehicleType'          => $lastResult->Dossier->Vehicle->VehicleType ?? '' ,
+                                  'Manufacturer'         => $lastResult->Dossier->Vehicle->Manufacturer ?? '' ,
+                                  'BaseModel'            => $lastResult->Dossier->Vehicle->BaseModel ?? '' ,
+                                  'SubModel'             => $lastResult->Dossier->Vehicle->SubModel ?? '' ,
+                                  'equipment'            => $lastResult->Dossier->Vehicle->DATECodeEquipment->EquipmentPosition ?? '' ,
+                                );
+        }else{
+            foreach ($lastResult->Dossier as $key => $val) {
+                $result[] = array('DatECode'             => $val->Vehicle->DatECode ?? '' , 
+                                  'ConstructionTimeFrom' => $val->Vehicle->ConstructionTimeFrom ?? '' ,
+                                  'ConstructionTimeTo'   => $val->Vehicle->ConstructionTimeTo ?? '' ,
+                                  'ManufacturerName'     => $val->Vehicle->ManufacturerName ?? '' ,
+                                  'ContainerName'        => $val->Vehicle->ContainerName ?? '' ,
+                                  'BaseModelName'        => $val->Vehicle->BaseModelName ?? '' ,
+                                  'SubModelName'         => $val->Vehicle->SubModelName ?? '' ,
+                                  'VehicleType'          => $val->Vehicle->VehicleType ?? '' ,
+                                  'Manufacturer'         => $val->Vehicle->Manufacturer ?? '' ,
+                                  'BaseModel'            => $val->Vehicle->BaseModel ?? '' ,
+                                  'SubModel'             => $val->Vehicle->SubModel ?? '' ,
+                                  'equipment'            => $val->Vehicle->DATECodeEquipment->EquipmentPosition ?? '' ,
+                                );
+            }
+        }
 
-						//$result[] = $val4;
-					}
-				}
-			}
-		}
+        //prex($result);
 
 		$hasResult = (object)array('motor' => array(), 'govde' => array(), 'sanziman' => array(),'model' => array(), 'altModel' => array(),'marka' => array(),'aks' => array(),'tahrik' => array(), 'dizayn' => array());
 		//prex($result);
-
-		$rs = array();
-		foreach ($result as $key => $val) {
-			if ($val['ns1ConstructionTimeFrom'] != '') {
-				$rs[] = $val;
-			}
-		}
-		$result = $rs;
+        $ir = 0;
 
 		foreach ($result as $key => $val) {
 			//prex($val);
 			if ($hasResult->motor == array()) {
 				foreach ($val['equipment'] as $key5 => $val5) {
-					if ($val5['ns1EquipmentClass'] == 1) {
+					if ($val5->EquipmentClass == 1) {
 						$hasResult->motor[] = $val5;
+                        $ir++;
 					}
 				}
 			}else{
 				$i = 0;
 				foreach ($hasResult->motor as $key2 => $val2) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 1) {
-							if ($val5['ns1DatEquipmentId'] == $val2['ns1DatEquipmentId']) {
+						if ($val5->EquipmentClass == 1) {
+							if ($val5->DatEquipmentId == $val2->DatEquipmentId) {
 								$i++;
+                                $ir++;
 							}
 						}
 					}
 				}
 				if ($i == 0) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 1) {
+						if ($val5->EquipmentClass == 1) {
 							$hasResult->motor[] = $val5;
+                            $ir++;
 						}
 					}
 				}
@@ -1372,25 +1522,28 @@ class Dat_model extends Core_Model
 
 			if ($hasResult->govde == array()) {
 				foreach ($val['equipment'] as $key5 => $val5) {
-					if ($val5['ns1EquipmentClass'] == 2) {
+					if ($val5->EquipmentClass == 2) {
 						$hasResult->govde[] = $val5;
+                        $ir++;
 					}
 				}
 			}else{
 				$i = 0;
 				foreach ($hasResult->govde as $key2 => $val2) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 2) {
-							if ($val5['ns1DatEquipmentId'] == $val2['ns1DatEquipmentId']) {
+						if ($val5->EquipmentClass == 2) {
+							if ($val5->DatEquipmentId == $val2->DatEquipmentId) {
 								$i++;
+                                $ir++;
 							}
 						}
 					}
 				}
 				if ($i == 0) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 2) {
+						if ($val5->EquipmentClass == 2) {
 							$hasResult->govde[] = $val5;
+                            $ir++;
 						}
 					}
 				}
@@ -1399,25 +1552,28 @@ class Dat_model extends Core_Model
 
 			if ($hasResult->sanziman == array()) {
 				foreach ($val['equipment'] as $key5 => $val5) {
-					if ($val5['ns1EquipmentClass'] == 11) {
+					if ($val5->EquipmentClass == 11) {
 						$hasResult->sanziman[] = $val5;
+                        $ir++;
 					}
 				};
 			}else{
 				$i = 0;
 				foreach ($hasResult->sanziman as $key2 => $val2) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 11) {
-							if ($val5['ns1DatEquipmentId'] == $val2['ns1DatEquipmentId']) {
+						if ($val5->EquipmentClass == 11) {
+							if ($val5->DatEquipmentId == $val2->DatEquipmentId) {
 								$i++;
+                                $ir++;
 							}
 						}
 					}
 				}
 				if ($i == 0) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 11) {
+						if ($val5->EquipmentClass == 11) {
 							$hasResult->sanziman[] = $val5;
+                            $ir++;
 						}
 					}
 				}
@@ -1425,25 +1581,28 @@ class Dat_model extends Core_Model
 
 			if ($hasResult->aks == array()) {
 				foreach ($val['equipment'] as $key5 => $val5) {
-					if ($val5['ns1EquipmentClass'] == 3) {
+					if ($val5->EquipmentClass == 3) {
 						$hasResult->aks[] = $val5;
+                        $ir++;
 					}
 				};
 			}else{
 				$i = 0;
 				foreach ($hasResult->aks as $key2 => $val2) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 3) {
-							if ($val5['ns1DatEquipmentId'] == $val2['ns1DatEquipmentId']) {
+						if ($val5->EquipmentClass == 3) {
+							if ($val5->DatEquipmentId == $val2->DatEquipmentId) {
 								$i++;
+                                $ir++;
 							}
 						}
 					}
 				}
 				if ($i == 0) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 3) {
+						if ($val5->EquipmentClass == 3) {
 							$hasResult->aks[] = $val5;
+                            $ir++;
 						}
 					}
 				}
@@ -1452,25 +1611,28 @@ class Dat_model extends Core_Model
 
 			if ($hasResult->tahrik == array()) {
 				foreach ($val['equipment'] as $key5 => $val5) {
-					if ($val5['ns1EquipmentClass'] == 4) {
+					if ($val5->EquipmentClass == 4) {
 						$hasResult->tahrik[] = $val5;
+                        $ir++;
 					}
 				};
 			}else{
 				$i = 0;
 				foreach ($hasResult->tahrik as $key2 => $val2) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 4) {
-							if ($val5['ns1DatEquipmentId'] == $val2['ns1DatEquipmentId']) {
+						if ($val5->EquipmentClass == 4) {
+							if ($val5->DatEquipmentId == $val2->DatEquipmentId) {
 								$i++;
+                                $ir++;
 							}
 						}
 					}
 				}
 				if ($i == 0) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 4) {
+						if ($val5->EquipmentClass == 4) {
 							$hasResult->tahrik[] = $val5;
+                            $ir++;
 						}
 					}
 				}
@@ -1478,25 +1640,28 @@ class Dat_model extends Core_Model
 
 			if ($hasResult->dizayn == array()) {
 				foreach ($val['equipment'] as $key5 => $val5) {
-					if ($val5['ns1EquipmentClass'] == 10) {
+					if ($val5->EquipmentClass == 10) {
 						$hasResult->dizayn[] = $val5;
+                        $ir++;
 					}
 				};
 			}else{
 				$i = 0;
 				foreach ($hasResult->dizayn as $key2 => $val2) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 10) {
-							if ($val5['ns1DatEquipmentId'] == $val2['ns1DatEquipmentId']) {
+						if ($val5->EquipmentClass == 10) {
+							if ($val5->DatEquipmentId == $val2->DatEquipmentId) {
 								$i++;
+                                $ir++;
 							}
 						}
 					}
 				}
 				if ($i == 0) {
 					foreach ($val['equipment'] as $key5 => $val5) {
-						if ($val5['ns1EquipmentClass'] == 10) {
+						if ($val5->EquipmentClass == 10) {
 							$hasResult->dizayn[] = $val5;
+                            $ir++;
 						}
 					}
 				}
@@ -1505,48 +1670,55 @@ class Dat_model extends Core_Model
 
 
 			if ($hasResult->model == array()) {
-				$hasResult->model[] = array('id' => $val['ns1BaseModel'], 'name' => $val['ns1BaseModelName']);
+				$hasResult->model[] = array('id' => $val['BaseModel'], 'name' => $val['BaseModelName']);
 			}else{
 				$i = 0;
 				foreach ($hasResult->model as $key2 => $val2) {
-					if ($val['ns1BaseModel'] == $val2['id']) {
+					if ($val['BaseModel'] == $val2['id']) {
 						$i++;
+                        $ir++;
 					}
 				}
 				if ($i == 0) {
-					$hasResult->model[] = array('id' => $val['ns1BaseModel'], 'name' => $val['ns1BaseModelName']);
+					$hasResult->model[] = array('id' => $val['BaseModel'], 'name' => $val['BaseModelName']);
 				}
 			}
 
 
 			if ($hasResult->altModel == array()) {
-				$hasResult->altModel[] = array('id' => $val['ns1SubModel'], 'name' => $val['ns1SubModelName']);
+				$hasResult->altModel[] = array('id' => $val['SubModel'], 'name' => $val['SubModelName']);
 			}else{
 				$i = 0;
 				foreach ($hasResult->altModel as $key2 => $val2) {
-					if ($val['ns1SubModel'] == $val2['id']) {
+					if ($val['SubModel'] == $val2['id']) {
 						$i++;
+                        $ir++;
 					}
 				}
 				if ($i == 0) {
-					$hasResult->altModel[] = array('id' => $val['ns1SubModel'], 'name' => $val['ns1SubModelName']);
+					$hasResult->altModel[] = array('id' => $val['SubModel'], 'name' => $val['SubModelName']);
 				}
 			}
 
 			if ($hasResult->marka == array()) {
-				$hasResult->marka[] = array('id' => $val['ns1Manufacturer'], 'name' => $val['ns1ManufacturerName']);
+				$hasResult->marka[] = array('id' => $val['Manufacturer'], 'name' => $val['ManufacturerName']);
 			}else{
 				$i = 0;
 				foreach ($hasResult->marka as $key2 => $val2) {
-					if ($val['ns1Manufacturer'] == $val2['id']) {
+					if ($val['Manufacturer'] == $val2['id']) {
 						$i++;
+                        $ir++;
 					}
 				}
 				if ($i == 0) {
-					$hasResult->marka[] = array('id' => $val['ns1Manufacturer'], 'name' => $val['ns1ManufacturerName']);
+					$hasResult->marka[] = array('id' => $val['Manufacturer'], 'name' => $val['ManufacturerName']);
 				}
 			}
 		}
+
+        if ($ir == 0) {
+            prex('ir Boş');
+        }
 
 		//prex($hasResult);
 		$res = new StdClass;
@@ -1554,15 +1726,15 @@ class Dat_model extends Core_Model
 		$res->result 	= $result;
 
 		usort($res->motor, function($a, $b) {
-		    return $a['ns1Description'] <=> $b['ns1Description'];
+		    return $a->Description <=> $b->Description;
 		});
 
 		usort($res->govde, function($a, $b) {
-		    return $a['ns1Description'] <=> $b['ns1Description'];
+		    return $a->Description <=> $b->Description;
 		});
 
 		usort($res->sanziman, function($a, $b) {
-		    return $a['ns1Description'] <=> $b['ns1Description'];
+		    return $a->Description <=> $b->Description;
 		});
 
 		usort($res->model, function($a, $b) {
@@ -1575,19 +1747,172 @@ class Dat_model extends Core_Model
 		    return $a['name'] <=> $b['name'];
 		});
 		usort($res->aks, function($a, $b) {
-		    return $a['ns1Description'] <=> $b['ns1Description'];
+		    return $a->Description <=> $b->Description;
 		});
 		usort($res->tahrik, function($a, $b) {
-		    return $a['ns1Description'] <=> $b['ns1Description'];
+		    return $a->Description <=> $b->Description;
 		});
 		usort($res->dizayn, function($a, $b) {
-		    return $a['ns1Description'] <=> $b['ns1Description'];
+		    return $a->Description <=> $b->Description;
 		});
 
-
+/*
 		$this->db->set(array('vin' => $newVin, 'detail' => json_encode($res)));
 		$this->db->insert('vin_cache');
-		return $res;
+        */
+		return array('status' => 'true','data' => $res);;
 	}
+
+    public function getWheel($type,$brand,$model,$subModel,$id = '',$year = '')
+    {
+        $datToken = $this->getToken();
+        $loginData = $this->getLoginData();
+
+        $client = new SoapClient(
+            null,
+            array(
+                'location' => 'https://www.dat.de/DATECodeSelection/services/VehicleSelectionService?wsdl',
+                'uri' => 'https://www.dat.de/DATECodeSelection/services/VehicleSelectionService?wsdl',
+                'trace' => 1,
+                'use' => SOAP_LITERAL,
+            )
+        );
+
+        // Soap Header Begin
+        $headerParam = new SoapVar($loginData, XSD_ANYXML, NULL, NULL, NULL, NULL);
+
+        $header = new SoapHeader( 'http://sphinx.dat.de/services/VehicleSelectionService', 'Header', $headerParam );
+        $client->__setSoapHeaders($header);
+        // Soap Header End
+
+        //Soap Body Begin
+        $soapVar = '
+        <request>
+            <locale country="tr" datCountryIndicator="tr" language="tr"/>
+            <sessionID>'.$datToken.'</sessionID>
+            <restriction>ALL</restriction>
+            <vehicleType>'.$type.'</vehicleType>
+            <manufacturer>'.$brand.'</manufacturer>
+            <baseModel>'.$model.'</baseModel>
+            <subModel>'.$subModel.'</subModel>';
+
+        if ($year != '') {
+            $year = (($year-1970)*120)+10;
+            $soapVar .= '<constructionTimeFrom>'.$year.'</constructionTimeFrom>
+                            <constructionTimeTo>'.($year+120).'</constructionTimeTo>';
+        }
+        if ($id != '') {
+            foreach ($id as $key => $val) {
+                $soapVar .= '<availableOptions>'.$val.'</availableOptions>';
+            }
+        }
+
+        $soapVar .= '</request>';
+
+        $params = new \SoapVar($soapVar, XSD_ANYXML);
+        //Soap Body End
+
+
+        //Soap Method Call
+        $client->getWheelBaseOptions($params);
+        $response   = $client->__getLastResponse();
+        //prex($client->__getLastRequest());
+
+        $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
+        $xml = new SimpleXMLElement($response);
+        $body = $xml->xpath('//SBody')[0];
+        $lastResult = json_decode(json_encode((array)$body), TRUE); 
+
+        $result = array();
+        foreach ($lastResult as $key => $val) {
+            foreach ($val as $key2 => $val2) {
+                if (count($val2) == 1) {
+                    $result[] = $val2['@attributes'];
+                }else{
+                    foreach ($val2 as $key3 => $val3) {
+                        $result[] = ($val3['@attributes']);
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    public function getTypeOfDrive($type,$brand,$model,$subModel,$id = '',$year = '')
+    {
+        $datToken = $this->getToken();
+        $loginData = $this->getLoginData();
+
+        $client = new SoapClient(
+            null,
+            array(
+                'location' => 'https://www.dat.de/DATECodeSelection/services/VehicleSelectionService?wsdl',
+                'uri' => 'https://www.dat.de/DATECodeSelection/services/VehicleSelectionService?wsdl',
+                'trace' => 1,
+                'use' => SOAP_LITERAL,
+            )
+        );
+
+        // Soap Header Begin
+        $headerParam = new SoapVar($loginData, XSD_ANYXML, NULL, NULL, NULL, NULL);
+
+        $header = new SoapHeader( 'http://sphinx.dat.de/services/VehicleSelectionService', 'Header', $headerParam );
+        $client->__setSoapHeaders($header);
+        // Soap Header End
+
+        //Soap Body Begin
+        $soapVar = '
+        <request>
+            <locale country="tr" datCountryIndicator="tr" language="tr"/>
+            <sessionID>'.$datToken.'</sessionID>
+            <restriction>ALL</restriction>
+            <vehicleType>'.$type.'</vehicleType>
+            <manufacturer>'.$brand.'</manufacturer>
+            <baseModel>'.$model.'</baseModel>
+            <subModel>'.$subModel.'</subModel>';
+
+        if ($year != '') {
+            $year = (($year-1970)*120)+10;
+            $soapVar .= '<constructionTimeFrom>'.$year.'</constructionTimeFrom>
+                            <constructionTimeTo>'.($year+120).'</constructionTimeTo>';
+        }
+        if ($id != '') {
+            foreach ($id as $key => $val) {
+                $soapVar .= '<availableOptions>'.$val.'</availableOptions>';
+            }
+        }
+
+        $soapVar .= '</request>';
+
+        $params = new \SoapVar($soapVar, XSD_ANYXML);
+        //Soap Body End
+
+
+        //Soap Method Call
+        $client->getTypeOfDriveOptions($params);
+        $response   = $client->__getLastResponse();
+        //prex($client->__getLastRequest());
+
+        $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
+        $xml = new SimpleXMLElement($response);
+        $body = $xml->xpath('//SBody')[0];
+        $lastResult = json_decode(json_encode((array)$body), TRUE); 
+
+        $result = array();
+        foreach ($lastResult as $key => $val) {
+            foreach ($val as $key2 => $val2) {
+                if (count($val2) == 1) {
+                    $result[] = $val2['@attributes'];
+                }else{
+                    foreach ($val2 as $key3 => $val3) {
+                        $result[] = ($val3['@attributes']);
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
 
 }?>

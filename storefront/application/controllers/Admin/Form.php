@@ -12,7 +12,7 @@ class Form extends Core_Controller
 	public function index()
 	{
 		$data = new StdClass;
-		$data->mainMenu = 'Form';
+		$data->mainMenu = 'FeedBack';
 		$data->subMenu = 'formList';
 		$data->contacts = $this->FM->getContacts();
 		$this->load->view('Admin/header', $data);
@@ -41,7 +41,7 @@ class Form extends Core_Controller
 	public function bulletin()
 	{
 		$data = new StdClass;
-		$data->mainMenu = 'Form';
+		$data->mainMenu = 'Notification';
 		$data->subMenu = 'bulletinList';
 		$data->bulletin = $this->FM->getBulletin();
 		$this->load->view('Admin/header', $data);
@@ -71,8 +71,9 @@ class Form extends Core_Controller
 	{
 		$data 					= new stdClass;
 		$header_data 			= new stdClass;
-		$header_data->mainMenu 	= 'Human_resources';
-		$header_data->subMenu 	= 'formPositionAdd';
+		$header_data->mainMenu 	= 'FeedBack';
+		$header_data->subMenu 	= 'positionList';
+		$header_data->lowerMenu = 'Human_resources';
 		if ($this->input->post()) {
 			$postData = $this->getAllPosts();
 			if ($this->FM->addPosition($postData)) {
@@ -92,8 +93,9 @@ class Form extends Core_Controller
 	{
 		$data 					= new stdClass;
 		$header_data 			= new stdClass;
-		$header_data->mainMenu 	= 'Human_resources';
+		$header_data->mainMenu 	= 'FeedBack';
 		$header_data->subMenu 	= 'positionList';
+		$header_data->lowerMenu = 'Human_resources';
 		$data->positions = $this->FM->getPositions();
 		$this->load->view('Admin/header',$header_data);
 		$this->load->view('Admin/positions',$data);

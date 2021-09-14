@@ -5,12 +5,37 @@
 				Anlaşmalı Servisler
 			</h3>
 			<ul class="m-subheader__breadcrumbs m-nav m-nav--inline">
-				<li class="m-nav__item m-nav__item--home">
-					<a href="<?=admin_url()?>" class="m-nav__link m-nav__link--icon">
-						<i class="m-nav__link-icon la la-home"></i>
-					</a>
-				</li>
+			    <li class="m-nav__item m-nav__item--home">
+			        <a href="<?=admin_url()?>" class="m-nav__link m-nav__link--icon">
+			            <i class="m-nav__link-icon la la-home"></i>
+			        </a>
+			    </li>
+			    <li class="m-nav__separator">
+			        >
+			    </li>
+			    <li class="m-nav__item">
+			        <a href="<?=admin_url('Sellers')?>" class="m-nav__link">
+			            <span class="m-nav__link-text">
+			            Site İçerik Yönetimi
+			            </span>
+			        </a>
+			    </li>
+			    <li class="m-nav__separator">
+			        >
+			    </li>
+			    <li class="m-nav__item">
+			        <a href="<?=$this->agent->referrer()?>" class="m-nav__link">
+			            <span class="m-nav__link-text">
+			            Geri Dön
+			            </span>
+			        </a>
+			    </li>
 			</ul>
+		</div>
+		<div>
+			<div>
+				<button type="button" class="btn m-btn--air btn-warning" onclick="window.location = '<?=site_url('Admin/Contracted_services')?>'">Anlaşmalı Servis Ekle</button>
+			</div>
 		</div>
 	</div>
 </div>

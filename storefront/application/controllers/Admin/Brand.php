@@ -17,7 +17,7 @@ class Brand extends Core_Controller
 	{
 		$header_data = new StdClass;
 		$data = new StdClass;
-		$header_data->mainMenu = 'Brand';
+		$header_data->mainMenu = 'Aracagaci';
 		$header_data->subMenu = 'brandList';
 		$data->brands = $this->Brand_model->getBrands();
 		$this->load->view('Admin/header', $header_data);
@@ -29,8 +29,8 @@ class Brand extends Core_Controller
 	{
 		$header_data 			 = new StdClass;
 		$data 					 = new StdClass;
-		$header_data->mainMenu 	 = 'Brand';
-		$header_data->subMenu  	 = 'brandAdd';
+		$header_data->mainMenu 	 = 'Aracagaci';
+		$header_data->subMenu  	 = 'brandList';
 		if ($this->input->post()) {
 			$getAllPosts = $this->getAllPosts();
 			$getAllPosts->image = $this->session->flashdata('image');
@@ -77,7 +77,7 @@ class Brand extends Core_Controller
 	{
 		$header_data 			 = new StdClass;
 		$data 					 = new StdClass;
-		$header_data->mainMenu 	 = 'Brand';
+		$header_data->mainMenu 	 = 'Aracagaci';
 		$header_data->subMenu  	 = 'brandList';
 		$data->brand = $this->Brand_model->getBrandById($id);
 		if ($this->input->post()) {
@@ -98,5 +98,20 @@ class Brand extends Core_Controller
 		$this->load->view('Admin/header', $header_data);
 		$this->load->view('Admin/brand_edit',$data);
 		$this->load->view('Admin/footer');
+	}
+
+	public function sortUpdate()
+	{
+		$return = $this->input->post('sort', true);
+		$update_array = [];
+		foreach ($return as $key => $value) {
+			$update_array[$key]['id'] = $key;
+			$update_array[$key]['sort'] = $value;
+		}
+		if ($this->Brand_model->updateSort($update_array)) {
+			redirect($this->agent->referrer());
+		} else {
+			redirect($this->agent->referrer());
+		}
 	}
 }

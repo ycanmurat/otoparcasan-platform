@@ -130,10 +130,7 @@
 							</div>
 							<p class="comment-line"><?=$commentInfo->message?></p>
 							<b>
-								<?
-									$date = explode(" ",$commentInfo->comment_time);
-									echo $date[0].' - '.$date[1];
-								?>
+								<?=dateparse($commentInfo->comment_time)?>
 							</b>
 						</div>
 						<?if(!empty($commentInfo->answer)){?>

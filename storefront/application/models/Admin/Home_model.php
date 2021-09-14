@@ -7,123 +7,169 @@ class Home_model extends Core_Model
 		parent::__construct();
 	}
 
-	public function getUserPermission()
+	public function bulk_part_offer()
 	{
-		$this->db->select('name, email, phone, added_time, email_permission, deleted');
-		$this->db->from('users');
-		$this->db->where(array('deleted' => 0));
-		$this->db->limit(10);
-		$this->db->order_by('Id','DESC');
-		$getUserInfo = $this->db->get();
-		if ($getUserInfo->num_rows()>0) {
-			return $getUserInfo->result();
+		$this->db->where(['seen' => 0]);
+		return $this->db->count_all_results('offer_form');
+	}
+
+	public function web_site_reviews()
+	{
+		$this->db->where(['seen' => 0]);
+		return $this->db->count_all_results('reviews');
+	}
+
+	public function product_questions()
+	{
+		$this->db->where(['seen' => 0]);
+		return $this->db->count_all_results('questions');
+	}
+
+	public function questions_comments()
+	{
+		$this->db->where(['seen' => 0]);
+		return $this->db->count_all_results('comments');
+	}
+
+	public function get_last_users()
+	{
+		$this->db->select('u.id, CONCAT(u.name, " ",u.surname) as name, u.gender, u.deleted, u.added_time, lc.CityID, lc.CityName, lco.CountyID, lco.CountyName');
+		$this->db->from('users u');
+		$this->db->join('location_cities lc', 'u.city = lc.CityID', 'left');
+		$this->db->join('location_counties lco', 'u.town = lco.CountyID', 'left');
+		$this->db->where(['u.deleted' => 0]);
+		$this->db->order_by('u.id', 'DESC');
+		$this->db->limit(100);
+		$return_query = $this->db->get();
+		if ($return_query->num_rows() > 0) {
+			return $return_query->result();
 		} else {
-			return array();
+			return [];
 		}
 	}
 
-	public function getUsers()
+	public function product_quality_like()
 	{
-		$this->db->select('Id');
-		$this->db->from('users');
-		$this->db->where(array('email_permission' => 1, 'deleted' => 0));
-		$getQuery = $this->db->get();
-		return $getQuery->num_rows();
+		$this->db->select('product_quality');
+		$this->db->from('reviews');
+		$this->db->where(array('product_quality'=>1));
+		$returnQuery = $this->db->get();
+		return $returnQuery->num_rows();
 	}
 
-	public function getAllOrders()
+	public function product_quality_dislike()
 	{
-		$this->db->select('Id');
-		$this->db->from('orders');
-		$getQuery = $this->db->get();
-		return $getQuery->num_rows();
+		$this->db->select('product_quality');
+		$this->db->from('reviews');
+		$this->db->where(array('product_quality'=>0));
+		$returnQuery = $this->db->get();
+		return $returnQuery->num_rows();
 	}
 
-	public function getOrders()
+	public function ease_of_use_like()
 	{
-		$this->db->select('o.id, o.added_time, (select sum(price) from order_line where order_id = o.id) as totapPrice');
-		$this->db->from('orders o');
-		$this->db->order_by('id','DESC');
-		$this->db->limit(5);
-		$getOrdersInfo = $this->db->get();
-		if ($getOrdersInfo->num_rows()>0) 
-		{
-			return $getOrdersInfo->result();
-		}
-		else
-		{
-			return false;
-		}
+		$this->db->select('ease_of_use');
+		$this->db->from('reviews');
+		$this->db->where(array('ease_of_use'=>1));
+		$returnQuery = $this->db->get();
+		return $returnQuery->num_rows();
 	}
 
-	public function getWaitOrders()
+	public function ease_of_use_dislike()
 	{
-		$this->db->select('order_status');
-		$this->db->from('orders');
-		$this->db->where(array('order_status' => 2));
-		$getQuery = $this->db->get();
-		return $getQuery->result();
+		$this->db->select('ease_of_use');
+		$this->db->from('reviews');
+		$this->db->where(array('ease_of_use'=>0));
+		$returnQuery = $this->db->get();
+		return $returnQuery->num_rows();
 	}
 
-	public function getAllCampaings()
+	public function fast_shipping_like()
 	{
-		$this->db->select('Id,campaign_title,campaign_start,campaign_end,campaign_info,campaign_picture');
-		$this->db->from('campaigns');
-		$this->db->where(array('status' => 1, 'deleted' => 0));
-		$this->db->limit(4);
-		$this->db->order_by('Id','DESC');
-		$getUserInfo = $this->db->get();
-		if ($getUserInfo->num_rows()>0) 
-		{
-			return $getUserInfo->result();
-		}
-		else
-		{
-			return false;
-		}
+		$this->db->select('fast_shipping');
+		$this->db->from('reviews');
+		$this->db->where(array('fast_shipping'=>1));
+		$returnQuery = $this->db->get();
+		return $returnQuery->num_rows();
 	}
 
-	public function getPriceAll()
+	public function fast_shipping_dislike()
 	{
-		//$this->db->select('SUM(ol.price)-(SELECT SUM(discount_price) FROM orders WHERE order_status != 3 AND order_status != 2 AND order_status != 1) as totalprice');
-		$this->db->select('SUM(ol.price)-(SELECT SUM(discount_price) FROM orders WHERE order_status != 3 AND order_status != 2 AND order_status != 1) as Allprice');
-		$this->db->from('orders o');
-		$this->db->join('order_line ol','ol.order_id = o.id');
-		//$this->db->join('order_line ol ON ol.order_id = o.id');
-		$this->db->where('o.order_status != 3');
-		$this->db->where('o.order_status != 2');
-		$this->db->where('o.order_status != 1');
-		$getQuery = $this->db->get();
-		//return $getQuery->row;
-		return $getQuery->row();
-		/*SELECT SUM(ol.price)-(SELECT sum(discount_price) from orders 
-			WHERE order_status != 3 AND order_status != 2 AND order_status != 1) as totalprice 
-		From orders o INNER JOIN order_line ol ON ol.order_id = o.id 
-			WHERE o.order_status != 3 AND o.order_status != 2 AND o.order_status != 1
-
-			$this->db->select('(SELECT SUM(payments.amount) FROM payments WHERE payments.invoice_id=4) AS amount_paid', FALSE);*/
+		$this->db->select('fast_shipping');
+		$this->db->from('reviews');
+		$this->db->where(array('fast_shipping'=>0));
+		$returnQuery = $this->db->get();
+		return $returnQuery->num_rows();
 	}
 
-	public function getContactInfo()
+	public function product_packaging_like()
 	{
-		$this->db->select('*');
-		$this->db->from('contact');
-		$this->db->where(array('deleted'=>0));
-		$this->db->limit(10);
-		$this->db->order_by('Id','DESC');
-		$getQuery = $this->db->get();
-		if($getQuery->num_rows()>0){
-			return $getQuery->result();
-		}else{
-			return false;
-		}
+		$this->db->select('product_packaging');
+		$this->db->from('reviews');
+		$this->db->where(array('product_packaging'=>1));
+		$returnQuery = $this->db->get();
+		return $returnQuery->num_rows();
 	}
-	
-	public function getOfferInfo(){
-		$this->db->select('offer_status,deleted');
-		$this->db->from('offer');
-		$this->db->where(array('offer_status' => 0,'deleted'=>0));
-		$getQuery = $this->db->get();
-		return $getQuery->num_rows();
+
+	public function product_packaging_dislike()
+	{
+		$this->db->select('product_packaging');
+		$this->db->from('reviews');
+		$this->db->where(array('product_packaging'=>0));
+		$returnQuery = $this->db->get();
+		return $returnQuery->num_rows();
+	}
+
+	public function price_range_like()
+	{
+		$this->db->select('price_range');
+		$this->db->from('reviews');
+		$this->db->where(array('price_range'=>1));
+		$returnQuery = $this->db->get();
+		return $returnQuery->num_rows();
+	}
+
+	public function price_range_dislike()
+	{
+		$this->db->select('price_range');
+		$this->db->from('reviews');
+		$this->db->where(array('price_range'=>0));
+		$returnQuery = $this->db->get();
+		return $returnQuery->num_rows();
+	}
+
+	public function get_mounth_of_users()
+	{
+		$this->db->where('month(added_time)', date('m'));
+		return $this->db->count_all_results('users');
+	}
+
+	public function get_week_of_users()
+	{
+		$query = $this->db->query("SELECT added_time FROM users WHERE added_time > DATE_SUB(NOW(), INTERVAL 1 WEEK)");
+		$result = $query->result();
+		return count($result);
+	}
+
+	public function get_day_of_users()
+	{
+		$query = $this->db->query("SELECT added_time FROM users WHERE added_time > DATE_SUB(NOW(), INTERVAL 1 DAY)");
+		$result = $query->result();
+		return count($result);
+	}
+
+	public function getStar()
+	{
+		$this->db->select_avg('star');
+		$result = $this->db->get('reviews')->row();  
+		return $result;
+	}
+
+	public function getCountReviews()
+	{
+		$this->db->select('id');
+		$this->db->from('reviews');
+		$returnQuery = $this->db->get();
+		return $returnQuery->num_rows();
 	}
 }

@@ -9,8 +9,7 @@ class Order extends Core_Controller
 		parent::__construct();
 		$this->checkLogin();
 		$this->load->model('Admin/Order_model');
-		if ($this->session->userdata('user')->auth != 0 && $this->session->userdata('user')->auth != 3) 
-		{
+		if ($this->session->userdata('user')->auth != 0 && $this->session->userdata('user')->auth != 3){
 			redirect(site_url('Admin'));
 		}
 	}
@@ -21,187 +20,264 @@ class Order extends Core_Controller
 		$data = new StdClass;
 		$header_data->mainMenu = 'Order';
 		$header_data->subMenu  = 'OrderList';
+        $data->selectedPage = $this->input->get('s', true);
+        $data->prevPage = $data->selectedPage-1;
+        $data->nextPage = $data->selectedPage+1;
 
-		$sayfa = $this->input->get('s', true);
-		if ($sayfa == "" || $sayfa < 1) {
-			redirect(site_url('Admin/Order?s=1'));
+        $data->filter = (object)array('order_status' => $this->input->get('order_status',true) ?? ''
+                                   ,'key' => $this->input->get('key',true) ?? ''
+                                   ,'payment_status' => $this->input->get('payment_status',true) ?? '');
+
+        if ($data->filter->key != '' ||  $data->filter->payment_status != '' || $data->filter->order_status != '') {
+            $allCount = $this->Order_model->getAllCount($data->filter);
+        }else{
+            $allCount = $this->Order_model->getAllCount();
+        }
+
+        $pageCount = 5;
+        if ($allCount == 0) {
+            $data->lastPage = 1;
+        }else{
+            $data->lastPage = ceil($allCount/$pageCount);
+        }
+		
+        if ($data->selectedPage == "" || $data->selectedPage < 1 || $data->selectedPage > $data->lastPage) {
+			redirect(get_url('Admin/Order').'s=1');
 		}
-		$q = $this->Order_model->getList($sayfa);
-		if ($q!=false) 
-		{
-			if ($sayfa < 2) 
-			{
-				$data->prevPage = 1;
-			}
-			else
-			{
-				$data->prevPage = $sayfa-1;
-			}
-			if ($sayfa >= ceil($q->pageCount)) 
-			{
-				$data->nextPage = ceil($q->pageCount);
-			}
-			else
-			{
-				$data->nextPage = ceil($sayfa+1);
-			}
-			$data->list 		= $q->list;
-			$data->selectedPage = $sayfa;
-			$data->pageCount 	= $q->pageCount;
-		}
-		else
-		{
-			$data->prevPage 	= 1;
-			$data->nextPage 	= 1;
-			$data->list 		= array();
-			$data->selectedPage = 1;
-			$data->pageCount 	= 1;
-		}
-		$data->orderstatus = $this->Order_model->orderStatusArr;
-		$data->paymenttype = $this->Order_model->paymentTypeArr;
-		//$sonuc2['sonuc'] = array($this->session->flashdata('order_result1'), $this->session->flashdata('order_result2'));
-		$data->efaturasonuc = array($this->session->flashdata('efaturasonuc1'), $this->session->flashdata('efaturasonuc2'));
+
+        if ($data->filter->key != '' ||  $data->filter->payment_status != '' || $data->filter->order_status != '') {
+            $data->orders = $this->Order_model->getList($data->selectedPage,$pageCount,$data->filter);
+        }else{
+            $data->orders = $this->Order_model->getList($data->selectedPage,$pageCount);
+        }
+
+        $data->orderStatus = get_admin_order_status();
+        $data->paymentStatus = get_payment_status();
 
 		$this->load->view('Admin/header', $header_data);
 		$this->load->view('Admin/order', $data);
 		$this->load->view('Admin/footer');
 	}
 
-	public function PaymentStatus($id = 0, $new = 0)
-	{
-		if ($id == 0) {
-			redirect(admin_url('Order'));
-		}
-		$this->Order_model->SetPaymentStatus((int)$id, (int)$new);
-		redirect($_SERVER['HTTP_REFERER']);
-	}
-
-	public function OrderStatus($id = 0, $new = 0)
-	{
-		if ($id == 0) {
-			redirect(admin_url('Order'));
-		}
-		$this->Order_model->SetOrderStatus((int)$id, (int)$new);
-		redirect($_SERVER['HTTP_REFERER']);
-	}
-
-	public function View($id = 0)
+	public function detail($id = 0)
 	{
 		if ($id == 0) {
 			redirect(admin_url('Order'));
 		}
 
-		$header_data = new StdClass;
 		$data = new StdClass;
-		$header_data->mainMenu = 'Order';
-		$header_data->subMenu  = 'OrderList';
+		$data->mainMenu = 'Order';
+		$data->subMenu  = 'OrderList';
 
+        $data->missingProduct = 0;
+		$data->order = $this->Order_model->getOrderId($id);
 
-		$data->orderstatus = $this->Order_model->orderStatusArr;
-		$data->paymenttype = $this->Order_model->paymentTypeArr;
+        if ($data->order == false) {
+            redirect(admin_url('Order'));
+        }
 
-		$orderdata = $this->Order_model->GetOrderById($id);
+        foreach ($data->order->lines as $key => $val) {
+            if ($val->status_inside == 8) {
+                $data->missingProduct++;
+            }
+        }
 
-		if ($orderdata->country == 212 && $orderdata->icountry == 212) {
-			$orderdata->country = "TÜRKİYE";
-			$orderdata->icountry = "TÜRKİYE";
-			if ($orderdata->city == $orderdata->icity) {
-				$gCityName = $this->Order_model->GetCityName($orderdata->city);
-				$orderdata->city = $gCityName;
-				$orderdata->icity = $gCityName;
-				if ($orderdata->town == $orderdata->itown) {
-					$gTownName = $this->Order_model->GetTownName($orderdata->town);
-					$orderdata->town = $gTownName;
-					$orderdata->itown = $gTownName;
-				} else {
-					$orderdata->town = $this->Order_model->GetTownName($orderdata->town);
-					$orderdata->itown = $this->Order_model->GetTownName($orderdata->itown);
-				}
-			} else {
-				$orderdata->city = $this->Order_model->GetCityName($orderdata->city);
-				$orderdata->icity = $this->Order_model->GetCityName($orderdata->icity);
-			}
-		} else {
-			if ($orderdata->country == 212) {
-				$orderdata->country = "TÜRKİYE";
-				$orderdata->city = $this->Order_model->GetCityName($orderdata->city);
-				$orderdata->town = $this->Order_model->GetTownName($orderdata->town);
-			} else {
-				$orderdata->country = $this->Order_model->GetCountryName($orderdata->country);
-			}
+        //prex($data->order);
 
-			if ($orderdata->icountry == 212) {
-				$orderdata->icountry = "TÜRKİYE";
-				$orderdata->icity = $this->Order_model->GetCityName($orderdata->icity);
-				$orderdata->itown = $this->Order_model->GetTownName($orderdata->itown);
-			} else {
-				$orderdata->icountry = $this->Order_model->GetCountryName($orderdata->icountry);
-			}
-		}
-
-		$data->order = $orderdata;
-		$data->products = $this->Order_model->GetOrderLineByOrderId($id);
-		$data->orderno = $id;
-
-		 
-
-		$this->load->view('Admin/header', $header_data);
-		$this->load->view('Admin/order_view', $data);
+		$this->load->view('Admin/header', $data);
+		$this->load->view('Admin/order_view');
 		$this->load->view('Admin/footer');
 	}
 
-	public function ChangeStatus()
-	{
-		$id = $this->input->get('id', true);
-		$status = $this->input->get('status', true);
-		$new = $this->input->get('new', true);
-		if (!$id || !$status) {
-			redirect(admin_url('Order'));
-		}
+    public function missingProductSuccess($id)
+    {
+        $this->load->library('mailgunapi');
+        $this->Order_model->missingProductSuccess($id);
+        $order = $this->Order_model->getOrderId($id);
 
-		$this->Order_model->ChangeStatus($id, $status, $new);
-		redirect($_SERVER['HTTP_REFERER']);
-	}
-	
-	public function UpdateAddress($id = 0)
-	{
-		if ($id == 0) {
-			redirect(admin_url('Order'));
-		}
+        $data = new StdClass;
+        $data->name = $order->user->name.' '.$order->user->surname;
+        $data->products = array();
+        
+        foreach ($order->lines as $key => $val) {
+            if ($val->status_inside < 7) {
+                $data->products[] = (object)array('name'  => $val->name
+                                             ,'url'   => site_url($val->url)
+                                             ,'kod3'  => $val->kod3
+                                             ,'image' => site_url('assets/products/fren-disk-balata.png'));
+            }
+        }
 
-		if ($this->input->post()) {
-			$newArr = array();
-			foreach ($this->input->post() as $key => $value) {
-				$newArr[$key] = $this->input->post($key, true);
-			}
-			if ($this->Order_model->UpdateAddress($id, $newArr)) {
-				$this->session->set_flashdata('order_result1', 'Siparişin adresi güncellendi.');
-				$this->session->set_flashdata('order_result2', 'success');
-			} else {
-				$this->session->set_flashdata('order_result1', 'Bir hata oluştu.');
-				$this->session->set_flashdata('order_result2', 'danger');
-			}
-		}
-		redirect($_SERVER['HTTP_REFERER']);
+        $data->order_id         = $order->id;
+        $data->address          = $order->address->content.' '.$order->address->town_name.' / '.$order->address->city_name;
+        $data->billing_address  = $order->invoice_address->content.' '.$order->invoice_address->town_name.' / '.$order->invoice_address->city_name;
+        $data->user_email       = $order->user->email;
 
-	}
+        $html = $this->load->view('mail/order_eksik_confirm',$data,true);
+        $data = array('from'    => 'otoparcasan.com <info@otoparcasan.com>'
+                     ,'to'      => $data->user_email
+                     ,'subject' => $val->order_id.' Numaralı Siparişiniz Güncellendi.'
+                     ,'html'    => $html);
 
-	public function ExportExcel()
-	{
-		$this->Order_model->fetchDataFromTable();
-		redirect($_SERVER['HTTP_REFERER']);
-	}
+        $this->mailgunapi->send($data);
+        $this->Order_model->sendedNotification($val->order_id,1);
 
-	public function KargoDateUpdate($order_line_id,$date)
-	{
-		$this->Order_model->KargoDateUpdate($order_line_id,$date);
-		echo 1;
-	}
-	public function ProductUpdate($order_line_id)
-	{
-		$product_status = $this->input->post('product',true);
-		$this->Order_model->ProductUpdate($order_line_id,$product_status);
-		echo 1;
-	}
+        redirect($this->agent->referrer());
+    }
+
+    public function paymentStatusCheck() // Ödeme Onaylama Listesi
+    {
+        $data = new StdClass;
+        $data->mainMenu = 'Order';
+        $data->subMenu  = 'OdemeOnay';
+
+        $data->orders = $this->Order_model->getOrdersByPaymentStatus();
+
+        $this->load->view('Admin/header', $data);
+        $this->load->view('Admin/order_payment_check');
+        $this->load->view('Admin/footer');
+    }
+
+    public function changePaymentStatus($id,$type)
+    {
+        if ($type == 1) {
+            $this->Order_model->paymentSuccess($id);
+        }else{
+            $this->Order_model->paymentError($id);
+        }
+
+        redirect($this->agent->referrer());
+    }
+
+    public function supplyCheck() // Tedarik Onaylama Listesi
+    {
+        $data = new StdClass;
+        $data->mainMenu = 'Order';
+        $data->subMenu  = 'TedarikOnay';
+
+        $data->orderLines = $this->Order_model->getCurrentOrdersSublyCheck();
+
+        $this->load->view('Admin/header', $data);
+        $this->load->view('Admin/order_supply_check');
+        $this->load->view('Admin/footer');
+    }
+
+    public function changeSupplyCheck($cari,$stok,$type)
+    {
+        if ($type == 1) {
+            $this->Order_model->supplySuccess($cari,$stok);
+        }else{
+            $this->Order_model->supplyError($cari,$stok);
+        }
+
+        redirect($this->agent->referrer());
+    }
+
+    public function cancelOrderRefound()
+    {
+        $data = new StdClass;
+        $data->mainMenu = 'Order';
+        $data->subMenu  = 'SiparisIade';
+
+        $data->orders = $this->Order_model->getcancelOrderRefound();
+
+        $this->load->view('Admin/header', $data);
+        $this->load->view('Admin/order_refound');
+        $this->load->view('Admin/footer');
+    }
+
+    public function cancelOrderRefoundSuccess($id = '')
+    {
+        $this->Order_model->cancelOrderRefoundSuccess($id);
+        
+        redirect($this->agent->referrer());
+    }
+
+    public function changeIncomingCheck($cari,$stok,$type)
+    {
+        if ($type == 1) {
+            $this->Order_model->incomingSuccess($cari,$stok);
+        }else{
+            $this->Order_model->incomingError($cari,$stok);
+        }
+
+        redirect($this->agent->referrer());
+    }
+
+    public function changeOutgoingCheck($cari,$stok,$type)
+    {
+        if ($type == 1) {
+            $this->Order_model->outGoingSuccess($cari,$stok);
+        }else{
+            $this->Order_model->outGoingError($cari,$stok);
+        }
+
+        redirect($this->agent->referrer());
+    }
+
+    public function IncomingProductCheck() // Gelen Ürün Onaylama Listesi
+    {
+        $data = new StdClass;
+        $data->mainMenu = 'Order';
+        $data->subMenu  = 'GelenOnay';
+
+        $data->orderLines = $this->Order_model->getIncomingProducts();
+
+        $this->load->view('Admin/header', $data);
+        $this->load->view('Admin/order_invoming_check');
+        $this->load->view('Admin/footer');
+    }
+
+    public function missingProguctCheck() // Eksik Ürün Onaylama Listesi
+    {
+        $data = new StdClass;
+        $data->mainMenu = 'Order';
+        $data->subMenu  = 'EksikUrun';
+
+        $data->orders = $this->Order_model->getMissinProducts();
+
+        $this->load->view('Admin/header', $data);
+        $this->load->view('Admin/missing_products_order');
+        $this->load->view('Admin/footer');
+    }
+
+    public function goingCargoCheck()
+    {
+        $data = new StdClass;
+        $data->mainMenu = 'Order';
+        $data->subMenu  = 'KargoOnay';
+
+        $data->orders = $this->Order_model->getgoingCargoCheck();
+
+        $this->load->view('Admin/header', $data);
+        $this->load->view('Admin/order_go_cargo');
+        $this->load->view('Admin/footer');
+    }
+
+    public function goingCargoSuccess($id)
+    {
+        $this->Order_model->goingCargoSuccess($id);
+
+        redirect($this->agent->referrer());
+    }
+
+    public function outGoingCheck() // Giden Ürün Onaylama Listesi
+    {
+        $data = new StdClass;
+        $data->mainMenu = 'Order';
+        $data->subMenu  = 'GidenOnay';
+
+        $data->orderLines = $this->Order_model->getOutgoingProducts();
+
+        $this->load->view('Admin/header', $data);
+        $this->load->view('Admin/order_outgoing_check');
+        $this->load->view('Admin/footer');
+    }
+
+    public function orderCancel($id = '')
+    {
+        $this->Order_model->orderCancel($id);
+        redirect($this->agent->referrer());
+    }
 }
 ?>

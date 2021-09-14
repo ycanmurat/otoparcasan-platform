@@ -91,14 +91,13 @@
 
 		public function getPieceBrands()
 		{
-			$this->db->from('brands');
-			$this->db->where(array('status'=>1,'deleted'=>0,'category'=>2));
+			$this->db->where(array('status'=>1,'deleted'=>0));
 			$this->db->order_by('sort','ASC');
-			$returnQuery = $this->db->get();
-			if ($returnQuery->num_rows() > 0) {
-				return $returnQuery->result();
-			} else {
-				return array();
+			$q = $this->db->get('manufacturerBrand');
+			if ($q->num_rows()>0) {
+				return $q->result();
+			}else{
+				return false;
 			}
 		}
 

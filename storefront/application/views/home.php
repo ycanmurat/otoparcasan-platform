@@ -1,4 +1,3 @@
-<div class="big-searchLoading gizle"><img src="<?=site_url('assets/Front/images/tenor.gif')?>"><p>Şase arama işleminiz başladı. Aracınızın türüne göre sorgu süresi değişiklik gösterebilir. <br>Anlayışınız için teşekkür ederiz</p></div>
 <!-- Slider -->
 <section class="Slider p-lr">
 	<div class="container-fluid pt-1 pb-3">
@@ -17,31 +16,32 @@
 					<button id="clearArea"><i class="fa fa-undo" aria-hidden="true"></i></button>
 						<div class="Area">
 							<div class="sT">ŞASE NO</div>
-							<div class="plate-area">
-								<input type="text" class="plate-input" onkeypress="return enterScript(event)" placeholder="ŞASE NO" id="chasisNo">
-								<button type="button" onclick="sasiSearch()" class="plateSearchButon" id="chasisSearch"></button>
-							</div>
+                            <div class="plate-area">
+                                <input type="text" class="plate-input" maxlength="17" onkeypress="return enterScript(event)" placeholder="ŞASE NO" id="chasisNo">
+                                <button type="button" onclick="sasiSearch()" class="plateSearchButon" id="chasisSearch"></button>
+                            </div>
+                            <!--
+                            <div class="or"><span>VEYA </span></div>
+                            <div class="plate-area">
+                                <input type="text" class="plate-input" maxlength="17" onkeypress="return enterScript(event)" placeholder="Metin ile araç ara" id="chasisNo">
+                                <button type="button" onclick="sasiSearch()" class="plateSearchButon" id="chasisSearch"></button>
+                            </div>
+                        -->
 							<script>
 								function enterScript(e) {
-								    //See notes about 'which' and 'key'
 								    if (e.keyCode == 13) {
 								    	sasiSearch();
 								    }
 								}
 							</script>
-
 							<div class="or"><span>VEYA </span></div>
 							<div id="mobileSelectBtn" class="mobileSelect">Araç Seçin <i class="fa fa-chevron-down" aria-hidden="true"></i></div>
 								<div class="FormElements">
 									<select class="custom-select mt-2" id="carType">
 										<option value="0">- Araç Türünü Seçiniz </option>
 										<?php foreach ($dat->types as $key => $val) { ?>
-											<?php if ($dat->first) { ?>
-												<option value="<?=$val['key']?>"><?=$val['value']?></option>
-											<?php }else{ ?> 
-												<?php if ($val->status == 1) { ?>
-													<option value="<?=$val->key?>"><?=$val->name?></option>
-												<?php } ?>
+											<?php if ($val->status == 1) { ?>
+												<option data-img="<?=site_url($val->icon)?>" value="<?=$val->key?>"><?=$val->value?></option>
 											<?php } ?>
 										<?php } ?>
 									</select>
@@ -52,19 +52,11 @@
 										<option value="0">- Model -</option>
 									</select>
 									<select class="custom-select mt-2 carAlt" id="carSubModels" disabled>
-										<option value="0">- Alt Model -</option>
+										<option value="0">- Alt Tip -</option>
 									</select>
 								</div>
-							<div class="FormElements">
-								<div class="row mt-2">
-									<div class="col-12"><button onclick="CarDetails()" type="button" class="Btn Right">Ara</button></div>
-									<div class="col-12">
-										<div class="findmyCar" data-toggle="modal" data-target="#sendcarinfo">Aradığınız aracı kataloğumuzda bulamadınız mı ?</div>
-									</div>
-								</div>
-							</div>
 						</div>
-					<div class="plateSearch extraArea">
+					<div class="plateSearch extraArea plateSearch-edit">
 						<div class="searchLoading"><img src="<?=site_url('assets/Front/images/tenor.gif')?>"></div>
 						<form action="#" method="post">
 							<div class="Area">
@@ -74,8 +66,12 @@
 
 								<div class="FormElements">
 									<div class="row mt-2">
-										<div class="col-6 pr-2"><button onclick="addGarrage()" type="button" class="Btn Left">Garajıma Ekle</button></div>
-										<div class="col-6 pl-2"><button onclick="SearchPart()" type="button" class="Btn Right">Ara</button></div>
+                                        <?php if (!(null !==($this->session->userdata('userInfo')))) { ?>
+                                            <div class="col-12"><button onclick="SearchPart()" type="button" class="Btn Right">Ara</button></div>
+                                        <?php }else{ ?>
+                                            <div class="col-6 pr-2"><button onclick="addGarrage()" type="button" class="Btn Left">Garajıma Ekle</button></div>
+                                            <div class="col-6 pl-2"><button onclick="SearchPart()" type="button" class="Btn Right">Ara</button></div>
+                                        <?php } ?>
 									</div>
 								</div>
 							</div>
@@ -122,7 +118,7 @@
 																<input type="text" placeholder="Şase No" id="Vin_number">
 															</div>
 															<div class="col-sm-6">
-																<select name="offer_type" id="">
+																<select name="offer_type" id="offer_type">
 																	<option value="">Marka</option>
 																	<option value="1">Xxxxx</option>
 																	<option value="2">Xxxxx</option>
@@ -130,7 +126,7 @@
 																</select>
 															</div>
 															<div class="col-sm-6">
-																<select name="offer_type" id="">
+																<select name="offer_type2" id="offer_type2">
 																	<option value="">Model</option>
 																	<option value="1">Xxxxx</option>
 																	<option value="2">Xxxxx</option>
@@ -138,7 +134,7 @@
 																</select>
 															</div>
 															<div class="col-sm-6">
-																<select name="offer_type" id="">
+																<select name="offer_type3" id="offer_type3">
 																	<option value="">Kasa</option>
 																	<option value="1">Xxxxx</option>
 																	<option value="2">Xxxxx</option>
@@ -146,7 +142,7 @@
 																</select>
 															</div>
 															<div class="col-sm-6">
-																<select name="offer_type" id="">
+																<select name="offer_type4" id="offer_type4">
 																	<option value="">Yıl</option>
 																	<option value="1">Xxxxx</option>
 																	<option value="2">Xxxxx</option>
@@ -160,8 +156,8 @@
 														<div class="row">
 															<div class="col-12 text-center mt-4 mb-4">
 																<div class="checkItem d-inline">
-																	<input class="styled-checkbox" id="styled-checkbox-1" type="checkbox" value="value1">
-																	<label for="styled-checkbox-1">
+																	<input class="styled-checkbox" id="styled-checkbox-12" type="checkbox" value="value1">
+																	<label for="styled-checkbox-12">
 																		<a href="javascript:void(0);" data-toggle="modal" data-target="#secure_contract">Gizlilik Sözleşmesi</a>'ni Okudum. Onaylıyorum.
 																	</label>
 																</div>
@@ -243,75 +239,7 @@ Features -->
 		</div>
 	</section>
 	<!-- / Banners -->
-	<section class="Banners p-lr">
-		<div class="container-fluid">
-			<div class="row">
-				<div class="col-12">
-					<div class="site-title"><span>Detaylı Arama</span></div>
-				</div>
-				<div class="col-12">
-					<div class="plateSearch Listing HomeDetail">
-						<form action="#">
 
-							<div class="Area">
-								<div class="FormElements">
-									<div class="row">
-										<div class="col-lg-auto">
-											<select class="plate-select2" id="plate-brand2">
-												<option value="0">- Parça Marka -</option>
-												<option value="1">Marka1</option>
-												<option value="2">Marka2</option>
-											</select>
-										</div>
-										<div class="col">
-											<select class="plate-select2" id="plate-model2">
-												<option value="0">- Ana Kategori -</option>
-												<option value="1">Model1</option>
-												<option value="2">Model2</option>
-											</select>
-										</div>
-										<div class="col ">	
-											<select class="plate-select2" id="plate-year2">
-												<option value="0">- Alt Kategori -</option>
-												<option value="1">2001</option>
-												<option value="2">2002</option>
-											</select>
-										</div>
-
-										<div class="col">	
-											<select class="plate-select2" id="plate-motor2">
-												<option value="0">- Araç Marka -</option>
-												<option value="1">2001</option>
-												<option value="2">2002</option>
-											</select>
-										</div>
-
-										<div class="col ">	
-											<select class="plate-select2" id="plate-fuel2">
-												<option value="0">- Model -</option>
-												<option value="1">Benzin</option>
-												<option value="2">Dizel</option>
-												<option value="2">Dizel & Tüp</option>
-											</select>
-										</div>
-										<div class="col">	
-											<select class="plate-select2" id="plate-case2">
-												<option value="0">- Motor -</option>
-												<option value="1">Sedan</option>
-												<option value="2">pikap</option>
-											</select>
-										</div>
-										<div class="col m-auto"><button class="Btn Left">Parça Ara</button></div>
-									</div>
-								</div>
-							</div>
-
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
 
 	<!--videoArea -->
 	<section class="videoArea" style="background-image: url('<?=site_url($video->image)?>');">
@@ -320,30 +248,17 @@ Features -->
 				<div class="col-12">
 					<div class="videoTitle"><?=$video->title?></div>
 					<div class="sT"><?=$video->content?></div>
-
-					<div class="videoIcon" data-toggle="modal" data-target="#CompanyVideo">
-						<div class="circle pulse"></div>
-						<div class="circle">
-							<svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 100 100">
-								<polygon points="40,30 65,50 40,70"></polygon>
-							</svg>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="modal fade" id="CompanyVideo" tabindex="-1" role="dialog" aria-hidden="true">
-			<div class="modal-dialog modal-lg" role="document">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title">Kurumsal Video</h5>
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-							<span aria-hidden="true">&times;</span>
-						</button>
-					</div>
-					<div class="modal-body p-0">
-						<iframe width="100%" height="500" class="d-block" src="https://www.youtube.com/embed/<?=$video->video_link?>" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-					</div>
+                    
+                    <a href="https://www.youtube.com/watch?v=<?=$video->video_link?>" target="_blank">
+    					<div class="videoIcon">
+    						<div class="circle pulse"></div>
+    						<div class="circle">
+                                <svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                                    <polygon points="40,30 65,50 40,70"></polygon>
+                                </svg>
+    						</div>
+    					</div>
+                    </a>
 				</div>
 			</div>
 		</div>
@@ -365,26 +280,20 @@ Features -->
 				<div class="col-12">
 					<div class="column">
 						<div class="row">
-							<div class="col-xl-3 col-md-3 d-sm-none d-md-block d-none">
-								<a href="#" class="list-title" style="background-image: url('<?=site_url('assets/Front/images/yenibg.webp')?>');">
-									<div class="T">Vitrin Ürünleri</div>
-								</a>
-							</div>
-							<div class="col-xl-9 col-md-9 col-sm-12">
+							<div class="col-xl-12 col-md-12 col-sm-12">
 								<div class="list-wrapper">
 									<div class="HomeList-owl owl-carousel">
 										<div class="item">
-											<div class="list-item Small">
+											<div class="list-item Small home-list-item">
 												<div class="list-img">
-													<span class="ribbon new"><span>Yeni</span></span>
 													<a href="<?=site_url('Product/details')?>" class="img-link"><img src="<?=site_url('assets/Front/images/Detail/detail-img.webp')?>" alt=""></a>
 												</div>
-												<div class="list-content">
+												<div class="list-content home-list-content">
 													<div class="product-head">
 														<a href="#" class="ProductName">Özel Jantlar</a>
 														<p class="productInfo">Marka:Ford <br>Stok Kodu:12345648</p>
 													</div>
-													<div class="product-control">
+													<div class="product-control home-vitrin">
 														<div class="product-stars">
 															<div class="item">
 																<i class="fa fa-star OK" aria-hidden="true"></i>
@@ -417,9 +326,8 @@ Features -->
 											</div>
 										</div>
 										<div class="item">
-											<div class="list-item Small">
+											<div class="list-item Small home-list-item">
 												<div class="list-img">
-													<span class="ribbon new"><span>Yeni</span></span>
 													<a href="<?=site_url('Product/details')?>" class="img-link"><img src="<?=site_url('assets/Front/images/Detail/detail-img-thumb.webp')?>" alt=""></a>
 												</div>
 												<div class="list-content">
@@ -427,7 +335,7 @@ Features -->
 														<a href="#" class="ProductName">Özel Jantlar</a>
 														<p class="productInfo">Marka:Ford <br>Stok Kodu:12345648</p>
 													</div>
-													<div class="product-control">
+													<div class="product-control home-vitrin">
 														<div class="product-stars">
 															<div class="item">
 																<i class="fa fa-star OK" aria-hidden="true"></i>
@@ -460,9 +368,8 @@ Features -->
 											</div>
 										</div>
 										<div class="item">
-											<div class="list-item Small">
+											<div class="list-item Small home-list-item">
 												<div class="list-img">
-													<span class="ribbon new"><span>Yeni</span></span>
 													<a href="<?=site_url('Product/details')?>" class="img-link"><img src="<?=site_url('assets/Front/images/Detail/detail-img2.webp')?>" alt=""></a>
 												</div>
 												<div class="list-content">
@@ -470,7 +377,7 @@ Features -->
 														<a href="#" class="ProductName">Özel Jantlar</a>
 														<p class="productInfo">Marka:Ford <br>Stok Kodu:12345648</p>
 													</div>
-													<div class="product-control">
+													<div class="product-control home-vitrin">
 														<div class="product-stars">
 															<div class="item">
 																<i class="fa fa-star OK" aria-hidden="true"></i>
@@ -503,9 +410,8 @@ Features -->
 											</div>
 										</div>
 										<div class="item">
-											<div class="list-item Small">
+											<div class="list-item Small home-list-item">
 												<div class="list-img">
-													<span class="ribbon new"><span>Yeni</span></span>
 													<a href="<?=site_url('Product/details')?>" class="img-link"><img src="<?=site_url('assets/Front/images/Detail/detail-img-thumb3.webp')?>" alt=""></a>
 												</div>
 												<div class="list-content">
@@ -513,7 +419,7 @@ Features -->
 														<a href="#" class="ProductName">Özel Jantlar</a>
 														<p class="productInfo">Marka:Ford <br>Stok Kodu:12345648</p>
 													</div>
-													<div class="product-control">
+													<div class="product-control home-vitrin">
 														<div class="product-stars">
 															<div class="item">
 																<i class="fa fa-star OK" aria-hidden="true"></i>
@@ -546,9 +452,8 @@ Features -->
 											</div>
 										</div>
 										<div class="item">
-											<div class="list-item Small">
+											<div class="list-item Small home-list-item">
 												<div class="list-img">
-													<span class="ribbon new"><span>Yeni</span></span>
 													<a href="<?=site_url('Product/details')?>" class="img-link"><img src="<?=site_url('assets/Front/images/Detail/detail-img3.webp')?>" alt=""></a>
 												</div>
 												<div class="list-content">
@@ -556,7 +461,7 @@ Features -->
 														<a href="#" class="ProductName">Özel Jantlar</a>
 														<p class="productInfo">Marka:Ford <br>Stok Kodu:12345648</p>
 													</div>
-													<div class="product-control">
+													<div class="product-control home-vitrin">
 														<div class="product-stars">
 															<div class="item">
 																<i class="fa fa-star OK" aria-hidden="true"></i>
@@ -589,9 +494,8 @@ Features -->
 											</div>
 										</div>
 										<div class="item">
-											<div class="list-item Small">
+											<div class="list-item Small home-list-item">
 												<div class="list-img">
-													<span class="ribbon new"><span>Yeni</span></span>
 													<a href="<?=site_url('Product/details')?>" class="img-link"><img src="<?=site_url('assets/Front/images/Detail/detail-img.webp')?>" alt=""></a>
 												</div>
 												<div class="list-content">
@@ -599,7 +503,7 @@ Features -->
 														<a href="#" class="ProductName">Özel Jantlar</a>
 														<p class="productInfo">Marka:Ford <br>Stok Kodu:12345648</p>
 													</div>
-													<div class="product-control">
+													<div class="product-control home-vitrin">
 														<div class="product-stars">
 															<div class="item">
 																<i class="fa fa-star OK" aria-hidden="true"></i>
@@ -632,9 +536,8 @@ Features -->
 											</div>
 										</div>
 										<div class="item">
-											<div class="list-item Small">
+											<div class="list-item Small home-list-item">
 												<div class="list-img">
-													<span class="ribbon new"><span>Yeni</span></span>
 													<a href="<?=site_url('Product/details')?>" class="img-link"><img src="<?=site_url('assets/Front/images/Detail/detail-img.webp')?>" alt=""></a>
 												</div>
 												<div class="list-content">
@@ -642,7 +545,7 @@ Features -->
 														<a href="#" class="ProductName">Özel Jantlar</a>
 														<p class="productInfo">Marka:Ford <br>Stok Kodu:12345648</p>
 													</div>
-													<div class="product-control">
+													<div class="product-control home-vitrin">
 														<div class="product-stars">
 															<div class="item">
 																<i class="fa fa-star OK" aria-hidden="true"></i>
@@ -675,9 +578,8 @@ Features -->
 											</div>
 										</div>
 										<div class="item">
-											<div class="list-item Small">
+											<div class="list-item Small home-list-item">
 												<div class="list-img">
-													<span class="ribbon new"><span>Yeni</span></span>
 													<a href="<?=site_url('Product/details')?>" class="img-link"><img src="<?=site_url('assets/Front/images/Detail/detail-img.webp')?>" alt=""></a>
 												</div>
 												<div class="list-content">
@@ -685,7 +587,7 @@ Features -->
 														<a href="#" class="ProductName">Özel Jantlar</a>
 														<p class="productInfo">Marka:Ford <br>Stok Kodu:12345648</p>
 													</div>
-													<div class="product-control">
+													<div class="product-control home-vitrin">
 														<div class="product-stars">
 															<div class="item">
 																<i class="fa fa-star OK" aria-hidden="true"></i>
@@ -718,9 +620,8 @@ Features -->
 											</div>
 										</div>
 										<div class="item">
-											<div class="list-item Small">
+											<div class="list-item Small home-list-item">
 												<div class="list-img">
-													<span class="ribbon new"><span>Yeni</span></span>
 													<a href="<?=site_url('Product/details')?>" class="img-link"><img src="<?=site_url('assets/Front/images/Detail/detail-img.webp')?>" alt=""></a>
 												</div>
 												<div class="list-content">
@@ -728,7 +629,7 @@ Features -->
 														<a href="#" class="ProductName">Özel Jantlar</a>
 														<p class="productInfo">Marka:Ford <br>Stok Kodu:12345648</p>
 													</div>
-													<div class="product-control">
+													<div class="product-control home-vitrin">
 														<div class="product-stars">
 															<div class="item">
 																<i class="fa fa-star OK" aria-hidden="true"></i>
@@ -761,9 +662,8 @@ Features -->
 											</div>
 										</div>
 										<div class="item">
-											<div class="list-item Small">
+											<div class="list-item Small home-list-item">
 												<div class="list-img">
-													<span class="ribbon new">Fırsat</span></span>
 													<a href="<?=site_url('Product/details')?>" class="img-link"><img src="<?=site_url('assets/Front/images/Detail/detail-img.webp')?>" alt=""></a>
 												</div>
 												<div class="list-content">
@@ -771,7 +671,7 @@ Features -->
 														<a href="#" class="ProductName">Özel Jantlar</a>
 														<p class="productInfo">Marka:Ford <br>Stok Kodu:12345648</p>
 													</div>
-													<div class="product-control">
+													<div class="product-control home-vitrin">
 														<div class="product-stars">
 															<div class="item">
 																<i class="fa fa-star OK" aria-hidden="true"></i>
@@ -876,7 +776,7 @@ Features -->
 							<div class="owl-carousel owl-theme owl-carBrands">
 								<?foreach ($pieceBrands as $key => $pieceInfo) {?>
 									<div class="item">
-										<img alt="<?=$pieceInfo->title?>" title="<?=$pieceInfo->title?>" src="<?=site_url($pieceInfo->image)?>">
+										<img alt="Marka" title="Marka" src="<?=site_url($pieceInfo->image)?>">
 									</div>
 									<?}?>
 								</div>
@@ -893,7 +793,7 @@ Features -->
 				<div class="container-fluid">
 					<div class="row">
 						<div class="col-12">
-							<div class="site-title"><span>Müşterilerimiz Ne Düşünüyor ?</span></div>
+							<div class="site-title site-title-edit"><span>Müşterilerimiz Ne Düşünüyor ?</span></div>
 						</div>
 						<div class="col-12">
 							<div class="testimonial-wrapper">
@@ -902,7 +802,7 @@ Features -->
 										<div class="item">
 											<div class="testimonial-item">
 												<div class="testimonial-head">
-													<div class="item Name"><?=$commentInfo->name.' '.$commentInfo->surname?></div>
+													<div class="item Name user-name user-name-edit"><?=$commentInfo->name.' '.$commentInfo->surname?></div>
 													<div class="item Stars">
 														<?if($commentInfo->star == 1){?>
 															<i class="fa fa-star OK"></i>
@@ -1004,10 +904,35 @@ Features -->
       </div>
       </div>
       <div class="modal-footer">
-      	<button onclick="sasiGarajaEkle()">Garajıma Ekle</button>
-      	<button onclick="sasiAra('<?=site_url('Category/')?>')">Ara</button>
+        <?php if (!(null !==($this->session->userdata('userInfo')))) { ?>
+            <button onclick="sasiAra('<?=site_url('yedek-parcalar/')?>')">Ara</button>
+        <?php }else{ ?>
+            <button onclick="sasiGarajaEkle()">Garajıma Ekle</button>
+            <button onclick="sasiAra('<?=site_url('yedek-parcalar/')?>')">Ara</button>
+        <?php } ?>
       </div>
     </div>
   </div>
 </div>
 <div id="carDetail" style="display: none;"><?=json_encode($carDetail ?? '')?></div>
+	
+<div class="cookie">
+	<p>
+		<div class="cookie-info">
+			<i class="fa fa-info" aria-hidden="true"></i>
+		</div>
+	Çerezler (cookie), otoparcasan.com web sitesini ve hizmetlerimizi daha etkin bir şekilde sunmamızı sağlamaktadır. Detaylı bilgi için
+	<a href="https://otoparcasan.kodakil.com/Corporate/editorPage"> Kişisel Verilerin Korunması</a> ile <a href="https://otoparcasan.kodakil.com/Corporate/editorPage"> Gizlilik ve Çerez Politikası</a>'nı inceleyebilirsiniz.
+	<button>
+		<i class="fa fa-times cookie-close" aria-hidden="true"></i>
+	</button>
+	</p>
+</div>
+
+<?php if ($this->session->flashdata('social_error')) { ?>
+    <script>
+        $(document).ready(function () {
+            Swal.fire({type: 'error', title: 'Hata !', html: '<center>'.<?=$this->session->flashdata('social_error')?>.'</center>', animation: false, customClass: 'animated tada'});
+        });
+    </script>
+<?php } ?>

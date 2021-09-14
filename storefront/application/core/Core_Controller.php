@@ -31,10 +31,15 @@ class Core_Controller extends CI_Controller
 	//Kullanıcı Tarafı Giriş Kontrolü
 	public function checkUserLogin()
 	{
-		$session = $this->session->userdata('userInfo');
-		if (!isset($session)) {
-			redirect(site_url('User'));
-		}
+        if (null !==($this->input->get('redirect'))) {
+            $r = site_url('giris-yap?redirect='.current_url());
+        }else{
+            $r = site_url('giris-yap');
+        }
+        $session = $this->session->userdata('userInfo');
+        if (!isset($session)) {
+            redirect($r);
+        }
 	}
 
 	//Social Login Kontrolü
@@ -42,7 +47,7 @@ class Core_Controller extends CI_Controller
 	{
 		$session = $this->session->userdata('userInfo');
 		if (isset($session)) {
-			redirect(site_url('User'));
+			redirect(site_url('giris-yap'));
 		}
 	}
 
@@ -111,6 +116,40 @@ class Core_Controller extends CI_Controller
 			return false;
 		}
 	}
+
+    public function sendBildirim($id = 0): void
+    {
+        $mails = $this->Core_Model->getBildirimMails($id);
+        $this->load->library('mailgunapi');
+        //$this->sendBildirim(4);
+        if ($mails != false) {
+            if ($id == 1) {
+                $this->mailgunapi->bildirim((object)$mails,(object)array(
+                     'baslik' => '1 Yeni ürün sorusu var'
+                    ,'buton_link' => 'https://otoparcasan.com/Admin/Comment/questionList'
+                    ,'buton_name' => 'Cevaplama sayfasına git'
+                    ,'title' => 'Yeni ürün sorunuz var'));
+            }else if ($id == 2) {
+                $this->mailgunapi->bildirim((object)$mails,(object)array(
+                     'baslik' => '1 Yeni ürün yorumu var'
+                    ,'buton_link' => 'https://otoparcasan.com/Admin/Comment/commentList'
+                    ,'buton_name' => 'Onaylama sayfasına git'
+                    ,'title' => 'Yeni ürün yorumu var'));
+            }else if ($id == 4) {
+                $this->mailgunapi->bildirim((object)$mails,(object)array(
+                     'baslik' => '1 Yeni site değerlendirmesi var'
+                    ,'buton_link' => 'https://otoparcasan.com/Admin/Comment'
+                    ,'buton_name' => 'İnceleme sayfasına git'
+                    ,'title' => 'Yeni site değerlendirmesi var'));
+            }else if ($id == 3) {
+                $this->mailgunapi->bildirim((object)$mails,(object)array(
+                     'baslik' => '1 Yeni sipariş var'
+                    ,'buton_link' => 'https://otoparcasan.com/Admin/Order?s=1'
+                    ,'buton_name' => 'Siparişler sayfasına git'
+                    ,'title' => '1 Yeni sipariş var'));
+            }
+        }
+    }
 	
 	/*public function Set_Cookie($name,$value,$time = 0)
 	{

@@ -53,11 +53,78 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'Home';
 $route['translate_uri_dashes'] = FALSE;
 
-$route['Category/(:any)'] 	= 'Category/index/$1';
-$route['Category/(:any)/(:any)'] 	= 'Category/index/$1/$2';
-$route['Help/(:any)'] 	= 'Help/detail/$1';
+$route['Help/(:any)']   = 'Help/detail/$1';
 
+//Kategori
+$route['yedek-parcalar']                = 'Category';
+$route['yedek-parcalar/(:any)']         = 'Category/index/$1';
+$route['yedek-parcalar/(:any)/(:any)']  = 'Category/index/$1/$2';
+$route['oto-bakim-ve-yaglar']           = 'Otobakim';
+
+//Hesabim
+$route['hesabim']                   = 'Account';
+$route['hesabim/sifre']             = 'Account/password';
+$route['hesabim/siparislerim']      = 'Account/orders';
+$route['hesabim/iadelerim']         = 'Account/returns';
+$route['hesabim/iban-bilgilerim']   = 'Account/iban';
+$route['hesabim/kuponlarim']        = 'Account/coupon';
+$route['hesabim/havale-bildirimi']  = 'Account/transfer';
+$route['hesabim/urun-sorularim']    = 'Account/questions';
+$route['hesabim/adreslerim']        = 'Account/address';
+$route['hesabim/favorilerim']       = 'Account/favorite';
+$route['hesabim/garajim']           = 'Account/garage';
+$route['hesabim/bildirimler']       = 'Account/notifications';
+$route['hesabim/siparislerim/(:any)']       = 'Account/order_detail/$1';
+
+//Corporate - Kurumsal
+$route['hakkimizda']                = 'Corporate';
+$route['toplu-parca-teklifi']       = 'Corporate/offerForm';
+$route['insankaynaklari']           = 'Corporate/insankaynaklari';
+$route['anlasmali-servisler']       = 'Corporate/contracted';
+$route['banka-fatura-bilgileri']    = 'Corporate/bankdetail';
+$route['iletisim']                  = 'Corporate/contact';
+$route['sss']                       = 'Corporate/faq';
+$route['kurumsal/destek-talebi']    = 'Corporate/support';
+$route['kurumsal/yardim']           = 'Corporate/help';
+$route['kurumsal/yardim/(:any)']    = 'Corporate/help/$1';
+
+//User
+$route['giris-yap']                 = 'User/index';
+$route['kayit-ol']                  = 'User/register';
+$route['sifremi-unuttum']           = 'User/forgot_password';
+$route['sifre-yenileme/(:any)']       = 'User/password_refresh/$1';
+
+//Statik Sayfalar
+$route['kurumsal/(:any)']    = 'Statics/index/$1';
+
+//Bakim Robotu
+$route['bakim-robotu']      = 'Maintenance_robot';
+
+//Yorum
+$route['yorumlar']          = 'Reviews';
+
+//Search
+$route['arama-sonucu']      = 'search';
+
+//Sepet
+$route['sepet']             = 'Cart/index';
+$route['sepet/adres']       = 'Cart/address';
+$route['sepet/odeme']       = 'Cart/pay';
+$route['sepet/basarili']    = 'Cart/success';
+$route['sepet/basarisiz']   = 'Cart/error';
+$route['Basket/paytr_98423']   = 'Cart/paytr_98423';
+
+// genel
+$route['cikis-yap'] = 'User/logout';
 $route['Admin'] = 'Admin/Home';
 $route['admin'] = 'Admin/Home';
 
-$route['404_override'] = 'my404';
+//
+$route['Sociallogin'] = 'Sociallogin';
+$route['Sociallogin/callback'] = 'Sociallogin/callback';
+$route['Sociallogin/(:any)'] = 'Sociallogin/index/$1';
+
+//ürün
+$route['(:any)']    = 'Product/details/$1';
+
+$route['404_override'] = 'Home/my_404';

@@ -89,4 +89,44 @@ class Corporate_model extends Core_Model
 			return array();
 		}
 	}
+
+	public function offerFormAdd($postData)
+	{
+		$this->db->set($postData)->insert('offer_form');
+		if ($this->db->affected_rows() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+    public function getHelps()
+    {
+        $this->db->select('id,menu,slug');
+        $this->db->where(array('status' => 1,'deleted' => 0));
+        $this->db->order_by('sort','ASC');
+        $q = $this->db->get('help');
+        if ($q->num_rows()>0) {
+            return $q->result();
+        }else{
+            return array();
+        }
+    }
+
+    public function getHelpPost($slug = '')
+    {
+        if ($slug == '') {
+            $this->db->order_by('sort','ASC');
+            $this->db->limit(1);
+        }else{
+            $this->db->where(array('slug' => $slug));
+        }
+        $this->db->where(array('deleted' => 0,'status' => 1));
+        $q = $this->db->get('help');
+        if ($q->num_rows()>0) {
+            return $q->row();
+        }else{
+            return false;
+        }
+    }
 }

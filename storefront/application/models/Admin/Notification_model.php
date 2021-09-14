@@ -49,4 +49,18 @@ class Notification_model extends Core_Model
 			return array();
 		}
 	}
+
+    public function getSmsDatas()
+    {
+        $this->db->select('u.phone');
+        $this->db->where(array('n.campaign_sms' => 1,'u.deleted' => 0));
+        $this->db->from('users u');
+        $this->db->join('notification_settings n','u.id = n.user_id');
+        $q = $this->db->get();
+        if ($q->num_rows()) {
+            return $q->result();
+        }else{
+            return array();
+        }
+    }
 }

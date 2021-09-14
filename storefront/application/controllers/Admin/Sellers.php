@@ -13,8 +13,9 @@ class Sellers extends Core_Controller
 	{
 		$header_data = new StdClass();
 		$data = new StdClass();
-		$header_data->mainMenu = 'Sellers';
+		$header_data->mainMenu = 'Content';
 		$header_data->subMenu  = 'sellerList';
+		$header_data->lowerMenu = 'HomePageContent';
 		$data->sellers = $this->SM->getSellers();
 		$this->load->view('Admin/header',$header_data);
 		$this->load->view('Admin/seller',$data);
@@ -25,8 +26,9 @@ class Sellers extends Core_Controller
 	{
 		$header_data = new StdClass();
 		$data = new StdClass();
-		$header_data->mainMenu = 'Sellers';
-		$header_data->subMenu  = 'sellerAdd';
+		$header_data->mainMenu = 'Content';
+		$header_data->subMenu  = 'sellerList';
+		$header_data->lowerMenu = 'HomePageContent';
 		
 		if ($this->input->post()) {
 			$allPost = $this->GetAllPosts();
@@ -51,8 +53,9 @@ class Sellers extends Core_Controller
 	{
 		$header_data = new StdClass();
 		$data = new StdClass();
-		$header_data->mainMenu = 'Sellers';
+		$header_data->mainMenu = 'Content';
 		$header_data->subMenu  = 'sellerList';
+		$header_data->lowerMenu = 'HomePageContent';
 		$data->sellerInfo = $this->SM->getSellersById($id);
 		if ($this->input->post()) {
 			$allPost = $this->GetAllPosts();

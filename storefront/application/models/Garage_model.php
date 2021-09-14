@@ -13,14 +13,14 @@ class Garage_model extends Core_Model
 			$postData = array('user_id' => $this->session->userdata('userInfo')->id, 'car_id' => $data->carId, 'construction_time' => $data->consTime);
 			$this->db->where($postData);
 			if ($this->db->count_all_results('user_garage')>0) {
-				return false;
+				return 3;
 			}else{
 				$this->db->set($postData);
 				$this->db->insert('user_garage');
-				return true;
+				return 1;
 			}
 		}else{
-			return false;
+			return 2;
 		}
 	}
 
@@ -28,7 +28,7 @@ class Garage_model extends Core_Model
 	{
 		$this->load->model('Dat_model','dat');
 		$user_id = $this->session->userdata('userInfo')->id;
-
+        $this->db->order_by('id','DESC');
 		$this->db->where(array('user_id' => $user_id));
 		$q = $this->db->get('user_garage');
 		if ($q->num_rows() > 0) {

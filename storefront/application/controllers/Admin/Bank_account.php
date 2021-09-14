@@ -17,8 +17,9 @@ class Bank_account extends Core_Controller
 	{
 		$header_data = new StdClass;
 		$data = new StdClass;
-		$header_data->mainMenu = 'Bank';
+		$header_data->mainMenu 	 = 'Content';
 		$header_data->subMenu = 'bankList';
+		$header_data->lowerMenu = 'CorporateContent';
 		$data->accounts = $this->BM->getAccounts();
 		$this->load->view('Admin/header', $header_data);
 		$this->load->view('Admin/bank_list',$data);
@@ -29,8 +30,9 @@ class Bank_account extends Core_Controller
 	{
 		$header_data 			 = new StdClass;
 		$data 					 = new StdClass;
-		$header_data->mainMenu 	 = 'Bank';
-		$header_data->subMenu  	 = 'bankAdd';
+		$header_data->mainMenu 	 = 'Content';
+		$header_data->subMenu = 'bankList';
+		$header_data->lowerMenu = 'CorporateContent';
 		if ($this->input->post()) {
 			$getAllPosts = $this->getAllPosts();
 			$getAllPosts->image = $this->session->flashdata('image');
@@ -77,8 +79,9 @@ class Bank_account extends Core_Controller
 	{
 		$header_data 			 = new StdClass;
 		$data 					 = new StdClass;
-		$header_data->mainMenu 	 = 'Bank';
-		$header_data->subMenu  	 = 'bankList';
+		$header_data->mainMenu 	 = 'Content';
+		$header_data->subMenu = 'bankList';
+		$header_data->lowerMenu = 'CorporateContent';
 		$data->account = $this->BM->getAccountById($id);
 		if ($this->input->post()) {
 			$getAllPosts = $this->getAllPosts();

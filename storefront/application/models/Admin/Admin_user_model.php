@@ -16,6 +16,22 @@
 				return false;
 			}
 		}
+
+        public function getMails()
+        {
+            $q = $this->db->get('bildirim_mail');
+            if ($q->num_rows()>0) {
+                return $q->result();
+            }else{
+                return array();
+            }
+        }
+
+        public function update_mail($data)
+        {
+            $this->db->update_batch('bildirim_mail',$data,'id');
+        }
+
 		public function StatusEditM($Id, $NowStatus) 
 		{
 			return $this->db->set('status', $NowStatus)->where('Id', $Id)->update('admin_users');

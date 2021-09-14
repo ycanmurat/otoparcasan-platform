@@ -30,7 +30,7 @@ class Notification extends Core_Controller
 		$header_data = new StdClass;
 		$data = new StdClass;
 		$header_data->mainMenu = 'Notification';
-		$header_data->subMenu = 'NotificationAdd';
+		$header_data->subMenu = 'notificationList';
 		if ($this->input->post()) {
 			$getAllPosts = $this->getAllPosts();
 			$getAllPosts->user_id = 0;
@@ -86,4 +86,62 @@ class Notification extends Core_Controller
 		$this->load->view('Admin/notification_update',$data);
 		$this->load->view('Admin/footer');
 	}
+
+    public function sms()
+    {
+        $header_data = new StdClass;
+        $data = new StdClass;
+        $header_data->mainMenu = 'Notification';
+        $header_data->subMenu = 'sms';
+
+        $this->load->view('Admin/header', $header_data);
+        $this->load->view('Admin/notification_sms',$data);
+        $this->load->view('Admin/footer');
+    }
+
+    public function email()
+    {
+        $header_data = new StdClass;
+        $data = new StdClass;
+        $header_data->mainMenu = 'Notification';
+        $header_data->subMenu = 'email';
+
+        $this->load->view('Admin/header', $header_data);
+        $this->load->view('Admin/notification_email',$data);
+        $this->load->view('Admin/footer');
+    }
+
+    public function sendSms()
+    {
+        try {
+            $data = new StdClass;
+            $data->gsm = array();
+            $gsm = $this->Notification_model->getSmsDatas();
+
+            foreach ($gsm as $key => $val) {
+                $gsm = '9'.str_replace(' ','',str_replace(')','',str_replace('(','',$val->phone)));
+                if (strlen($gsm) == 12) {
+                    $data->gsm[] = $gsm;
+                }
+            }
+
+            $data->gsm = array_unique($data->gsm);
+            $data->gsm = implode(',',$data->gsm);
+            
+            $smsData = new StdClass;
+            $smsData->receivers = $data->gsm;
+            $smsData->text = $this->input->post('content',true);
+            $this->load->library('sms');
+            $this->sms->NetGsmSend($smsData);
+
+            $this->session->flashdata('onay',1);
+        } catch (Exception $e) {
+            $this->session->flashdata('hata',1);
+        }
+        
+        redirect(admin_url('Notification/sms'));
+
+
+        prex($this->input->post());
+    }
 }

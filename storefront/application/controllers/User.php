@@ -11,36 +11,40 @@ class User extends Core_Controller
 	public function index()
 	{
 		if (!empty($this->session->userdata('userInfo'))) {
-			redirect(site_url('Home'));
+			redirect(site_url());
 		}
+        
 		$data = new stdClass();
 		$data->cache_password_refresh_email = $this->session->userdata('cache_password_refresh_email');
 		$this->load->view('head',$data);
-		$this->load->view('login');
+        $this->load->view('user_login');
+		$this->load->view('footer_lite');
 	}
 
 	public function register()
 	{
 		if (!empty($this->session->userdata('userInfo'))) {
-			redirect(site_url('Home'));
+			redirect(site_url());
 		}
 		$this->load->view('head');
-		$this->load->view('register');
+		$this->load->view('user_register');
+        $this->load->view('footer_lite');
 	}
 
 	public function forgot_password()
 	{
 		if (!empty($this->session->userdata('userInfo'))) {
-			redirect(site_url('Home'));
+			redirect(site_url());
 		}
 		$this->load->view('head');
-		$this->load->view('forgot');
+		$this->load->view('user_forgot');
+        $this->load->view('footer_lite');
 	}
 
 	public function logout()
 	{
 		if (empty($this->session->userdata('userInfo'))) {
-			redirect(site_url('Home'));
+			redirect(site_url());
 		}
 		$this->session->unset_userdata('userInfo');
 		delete_cookie('remember_me');
@@ -54,18 +58,19 @@ class User extends Core_Controller
 			if ($data->passwordInformation = $this->UM->getPasswordInformation($remember_key)) {
 				if (getFunctionTime($data->passwordInformation->remember_added,3)) {
 					$this->load->view('head',$data);
-					$this->load->view('renew_password');
+					$this->load->view('user_renew_password');
 				} else {
 					$this->load->view('head');
-					$this->load->view('renew_password_false');
+					$this->load->view('user_renew_password_false');
 				}
 			} else {
 				$this->load->view('head');
-				$this->load->view('renew_password_false');
+				$this->load->view('user_renew_password_false');
 			}
 		} else {
 			$this->load->view('head');
-			$this->load->view('renew_password_false');
+			$this->load->view('user_renew_password_false');
 		}
+        $this->load->view('footer_lite');
 	}
 }

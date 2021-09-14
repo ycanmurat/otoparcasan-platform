@@ -16,8 +16,9 @@ class Support extends Core_Controller
 	{
 		$header_data = new StdClass;
 		$data = new StdClass;
-		$header_data->mainMenu = 'Support';
+		$header_data->mainMenu = 'FeedBack';
 		$header_data->subMenu = 'supportSectionList';
+		$header_data->lowerMenu = 'supportAndHelp';
 		$data->supportSections = $this->SM->getSupportSections();
 		$this->load->view('Admin/header', $header_data);
 		$this->load->view('Admin/suppor_section_list',$data);
@@ -28,8 +29,9 @@ class Support extends Core_Controller
 	{
 		$header_data 			 = new StdClass;
 		$data 					 = new StdClass;
-		$header_data->mainMenu 	 = 'Support';
-		$header_data->subMenu  	 = 'supporSectionAdd';
+		$header_data->mainMenu 	 = 'FeedBack';
+		$header_data->subMenu  	 = 'supportSectionList';
+		$header_data->lowerMenu = 'supportAndHelp';
 		if ($this->input->post()) {
 			$getAllPosts = $this->getAllPosts();
 			if ($this->SM->addSupportSection($getAllPosts)) {
@@ -76,8 +78,9 @@ class Support extends Core_Controller
 	{
 		$header_data 			 = new StdClass;
 		$data 					 = new StdClass;
-		$header_data->mainMenu 	 = 'Support';
-		$header_data->subMenu  	 = 'supporSectionAdd';
+		$header_data->mainMenu = 'FeedBack';
+		$header_data->subMenu = 'supportSectionList';
+		$header_data->lowerMenu = 'supportAndHelp';
 		$data->section = $this->SM->getSectionById($id);
 		if ($this->input->post()) {
 			$getAllPosts = $this->getAllPosts();
@@ -98,8 +101,9 @@ class Support extends Core_Controller
 	{
 		$header_data = new StdClass;
 		$data = new StdClass;
-		$header_data->mainMenu = 'Support';
+		$header_data->mainMenu 	 = 'FeedBack';
 		$header_data->subMenu = 'supportRequests';
+		$header_data->lowerMenu = 'supportAndHelp';
 		$data->supportRequests = $this->SM->getsupportRequests();
 		$this->load->view('Admin/header', $header_data);
 		$this->load->view('Admin/support_requests',$data);

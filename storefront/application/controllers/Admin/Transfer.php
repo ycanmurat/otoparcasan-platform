@@ -12,8 +12,8 @@ class Transfer extends Core_Controller
 	public function ibanList()
 	{
 		$data = new StdClass;
-		$data->mainMenu = 'Transfer';
-		$data->subMenu = 'ibanList';
+		$data->mainMenu = 'User';
+		$data->subMenu = 'UserList';
 
 		$data->ibanInformation = $this->TM->getIbanInformation();
 
@@ -34,8 +34,8 @@ class Transfer extends Core_Controller
 	public function transferList()
 	{
 		$data = new StdClass;
-		$data->mainMenu = 'Transfer';
-		$data->subMenu = 'transferList';
+		$data->mainMenu = 'User';
+		$data->subMenu = 'UserList';
 
 		$data->transferInformation = $this->TM->getTransferInformation();
 

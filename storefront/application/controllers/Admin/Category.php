@@ -17,10 +17,11 @@ class Category extends Core_Controller
 	{
 		$data = new StdClass();
 		$header_data = new StdClass();
-		$header_data->mainMenu = 'Category';
+		$header_data->mainMenu = 'Product';
 		$header_data->subMenu  = 'CatList';
 		$data->categories = $this->Api_model->getCategories();
-		//prex($data->categories);
+        $data->categoryDetails = $this->Global_model->getAllCategoryDetail();
+        $data->categories = $this->Global_model->getCategoryDetail($data->categories,$data->categoryDetails);
 		$this->load->view('Admin/header', $header_data);
 		$this->load->view('Admin/category', $data);
 		$this->load->view('Admin/footer');
@@ -34,7 +35,6 @@ class Category extends Core_Controller
 		}
 		$adminInfo = $this->session->userdata('user');
 		$data = new StdClass();
-
 
 		if (strlen($id)>2) {
 			$data->isKod3 = true;
@@ -50,11 +50,10 @@ class Category extends Core_Controller
 
 		$data->categories = $this->Api_model->getCategories();
 		$data->id = $id;
-		$data->mainMenu = 'Category';
+		$data->mainMenu = 'Product';
 		$data->subMenu  = 'CatList';
 		$data->categoryInfo = $this->Category_model->getCategoryInfoById($id);
 		if ($this->input->post() || !empty($this->session->flashdata('image'))) {
-			//prex($id);
 			$getAllPosts = $this->getAllPosts();
 
 			$getAllPosts->administrator_id = $adminInfo->Id;
@@ -76,6 +75,7 @@ class Category extends Core_Controller
 					}
 				}
 			}
+
 			if (empty($this->session->flashdata('image'))) {
 				$getAllPosts->image = $data->categoryInfo->image;
 			} else {
@@ -83,15 +83,11 @@ class Category extends Core_Controller
 			}
 			if ($this->Category_model->updateCategoryAndId($getAllPosts,$id)) {
 				$this->session->set_flashdata('onay',1);
-				redirect(admin_url('Category/editCategory/'.$id));
 			} else {
 				$this->session->set_flashdata('hata',1);
-				redirect(admin_url('Category/editCategory/'.$id));
 			}
+            redirect(site_url('Admin/Category/editCategory/'.$id));
 		}
-
-
-		//prex($data->categoryInfo);
 
 		$this->load->view('Admin/header', $data);
 		$this->load->view('Admin/edit_category');
@@ -110,7 +106,7 @@ class Category extends Core_Controller
 	{
 		$data = new StdClass();
 		$header_data = new StdClass();
-		$header_data->mainMenu = 'Category';
+		$header_data->mainMenu = 'Product';
 		$header_data->subMenu  = 'favList';
 		$data->categories = $this->Api_model->getCategories();
 		prex($data->categories);
@@ -142,7 +138,7 @@ class Category extends Core_Controller
 	public function Add()
 	{
 		$header_data = new StdClass;
-		$header_data->mainMenu = 'Category';
+		$header_data->mainMenu = 'Product';
 		$header_data->subMenu  = 'CatAdd';
 
 		if ($_POST) {
@@ -177,7 +173,7 @@ class Category extends Core_Controller
 			redirect(admin_url('Category'));
 		}
 		$header_data = new StdClass;
-		$header_data->mainMenu = 'Category';
+		$header_data->mainMenu = 'Product';
 		$header_data->subMenu  = 'CatList';
 
 		$this->load->view('Admin/header', $header_data);
@@ -233,7 +229,7 @@ class Category extends Core_Controller
 	public function productMust()
 	{
 		$header_data = new StdClass;
-		$header_data->mainMenu = 'Category';
+		$header_data->mainMenu = 'Product';
 		$header_data->subMenu  = 'productMust';
 		
 		$data['categories'] = $this->Category_model->getAllCategories();
@@ -246,7 +242,7 @@ class Category extends Core_Controller
 	{
 		$header_data = new StdClass;
 		$data 		 = new StdClass;
-		$header_data->mainMenu = 'Category';
+		$header_data->mainMenu = 'Product';
 		$header_data->subMenu  = 'productMust';
 		
 		$data->category_info = $this->Category_model->getCat($Id);

@@ -77,19 +77,23 @@ if (!function_exists('reverseArray'))
 {
 	function reverseArray($Array)
 	{
+		//prex($Array);
+		$data = array();
+		$ary = array();
 		foreach ($Array as $key => $val) {
 			if (is_array($val)) {
 				$ary[$key] = $val;
 			}
 		}
 
+
 		foreach ($ary as $key => $val) {
 			foreach ($val as $key2 => $val2) {
-				$langdata[$key2][$key] = $val2;
+				$data[$key2][$key] = $val2;
 			}
 		}
 		
-		return $langdata;
+		return $data;
 	}
 }
 
@@ -328,14 +332,31 @@ if (!function_exists('getFunctionTime'))
 }
 
 if (!function_exists('replaceStringProblemsReverse')) {
-	function replaceStringProblemsReverse($string)
-	{
-		return str_replace(
-			['Ý', 'Þ', 'Ð', 'ð', 'ý','þ'], 
-			['İ', 'Ş', 'Ğ', 'ğ', 'ı','ş'], 
-			$string
-		); 
-	}
+    function replaceStringProblemsReverse($string)
+    {
+        return str_replace(
+            ['Ý', 'Þ', 'Ð', 'ð', 'ý','þ'], 
+            ['İ', 'Ş', 'Ğ', 'ğ', 'ı','ş'], 
+            $string
+        ); 
+    }
+}
+
+if (!function_exists('changeKeyToQuery')) {
+    function changeKeyToQuery($string)
+    {
+        $string = str_replace(
+            ['a','b','c','ç','d','e','f','g','ğ','h','ı','i','j','k','l','m','n','o','ö','p','r','s','ş','t','u','ü','v','y','z'], 
+            ['A','B','C','Ç','D','E','F','G','Ğ','H','I','İ','J','K','L','M','N','O','Ö','P','R','S','Ş','T','U','Ü','V','Y','Z'],
+            $string
+        ); 
+
+        return str_replace(
+            ['İ', 'Ş', 'Ğ', 'ğ', 'ı','ş'], 
+            ['Ý', 'Þ', 'Ð', 'ð', 'ý','þ'], 
+            $string
+        ); 
+    }
 }
 
 if (!function_exists('time_ago')) {
@@ -552,4 +573,277 @@ if (!function_exists('arrayExplode')) {
 		}
 		return $ary;
 	}
+}
+
+if (!function_exists('exportExcel')) {
+	function exportExcel($filename='ExportExcel',$columns=array(),$data=array(),$replaceDotCol=array()){
+	    header('Content-Encoding: UTF-8');
+	    header('Content-Type: text/plain; charset=utf-8'); 
+	    header("Content-disposition: attachment; filename=".$filename.".xls");
+	    echo "\xEF\xBB\xBF"; // UTF-8 BOM
+	     
+	    $say=count($columns);
+	     
+	    echo '<table border="1"><tr>';
+	    foreach($columns as $v){
+	        echo '<th style="background-color:#FFA500">'.trim($v).'</th>';
+	    }
+	    echo '</tr>';
+	 
+	    foreach($data as $val){
+	        echo '<tr>';
+	        for($i=0; $i < $say; $i++){
+	 
+	            if(in_array($i,$replaceDotCol)){
+	                echo '<td>'.str_replace('.',',',$val[$i]).'</td>';
+	            }else{
+	                echo '<td>'.$val[$i].'</td>';
+	            }
+	        }
+	        echo '</tr>';
+	    }
+	}
+}
+
+if (!function_exists('mb_ucwords'))
+{
+	function mb_ucwords($str)
+	{
+		return mb_convert_case(mb_strtolower($str,'UTF-8'), MB_CASE_TITLE, "UTF-8");
+	}
+}
+
+if (!function_exists('teslimatGun'))
+{
+    function teslimatGun($date)
+    {
+        return date('w', strtotime($date));
+    }
+}
+
+if (!function_exists('teslimatGunTxt'))
+{
+    function teslimatGunTxt($date)
+    {
+        $q = date('w', strtotime($date));
+        if ($q == 0) {
+            $gun = 'Pazar';
+        }elseif ($q == 1) {
+            $gun = 'Pazartesi';
+        }elseif ($q == 2) {
+            $gun = 'Salı';
+        }elseif ($q == 3) {
+            $gun = 'Çarşamba';
+        }elseif ($q == 4) {
+            $gun = 'Perşembe';
+        }elseif ($q == 5) {
+            $gun = 'Cuma';
+        }else{
+            $gun = 'Cumartesi';
+        }
+
+        $q = date('n', strtotime($date));
+        if ($q == 1) {
+            $ay = 'Ocak';
+        }elseif ($q == 2) {
+            $ay = 'Şubat';
+        }elseif ($q == 3) {
+            $ay = 'Mart';
+        }elseif ($q == 4) {
+            $ay = 'Nisan';
+        }elseif ($q == 5) {
+            $ay = 'Mayıs';
+        }elseif ($q == 6) {
+            $ay = 'Haziran';
+        }elseif ($q == 7) {
+            $ay = 'Temmuz';
+        }elseif ($q == 8) {
+            $ay = 'Ağustos';
+        }elseif ($q == 9) {
+            $ay = 'Eylül';
+        }elseif ($q == 10) {
+            $ay = 'Ekim';
+        }elseif ($q == 11) {
+            $ay = 'Kasım';
+        }else{
+            $ay = 'Aralık';
+        }
+
+        $q = date('j', strtotime($date));
+
+        return $q.' '.$ay.' '.$gun;
+    }
+}
+
+
+if (!function_exists('carNameExplode'))
+{
+	function carNameExplode($name)
+	{
+		return explode('(', $name)[0];
+	}
+}
+
+if (!function_exists('array_to_object')) {
+    function array_to_object($array)
+    {
+        $object = new stdClass();
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $value = array_to_object($value);
+            }
+            $object->$key = $value;
+        }
+        return $object;
+    }
+}
+
+if (!function_exists('array_optimize')) {
+    function array_optimize($val="")
+    {
+        return json_decode(json_encode($val));
+    }
+}
+
+if (!function_exists('payment_types')) {
+    function payment_types($val='')
+    {
+        if ($val == 'card') {
+            return 1;
+        }elseif ($val == 'eft') {
+            return 2;
+        }
+    }
+}
+
+
+if (!function_exists('payment_types_user')) {
+    function payment_types_user($val='')
+    {
+        if ($val == 1) {
+            return 'Kredi Kartı';
+        }elseif ($val == 2) {
+            return 'Havale / EFT';
+        }
+    }
+}
+
+
+if (!function_exists('payment_status')) {
+    function payment_status($val='')
+    {
+        if ($val == 1) {
+            return 'Ödeme Onay Bekliyor';
+        }elseif ($val == 2) {
+            return 'Ödeme Onaylandı';
+        }elseif ($val == 3){
+            return 'Ödeme Onaylanmadı';
+        }elseif ($val == 4) {
+            return 'İade Edildi';
+        }
+    }
+}
+
+
+if (!function_exists('payment_status_color')) {
+    function payment_status_color($val='')
+    {
+        if ($val == 1) {
+            return 'info';
+        }elseif ($val == 2) {
+            return 'success';
+        }elseif ($val == 3){
+            return 'danger';
+        }elseif ($val == 4) {
+            return 'info';
+        }
+    }
+}
+
+
+if (!function_exists('payment_types_user_color')) {
+    function payment_types_user_color($val='')
+    {
+        if ($val == 1) {
+            return 'warning';
+        }elseif ($val == 2) {
+            return 'info';
+        }
+    }
+}
+
+if (!function_exists('admin_order_status')) {
+    function admin_order_status($val='')
+    {
+        if ($val == 1) {
+            return 'Ödeme Onayında';
+        }elseif ($val == 2) {
+            return 'Tedarik Onayında';
+        }elseif ($val == 3) {
+            return 'Ürün Bekleniyor';
+        }elseif ($val == 4) {
+            return 'Gelen Ürün Onay';
+        }elseif ($val == 5) {
+            return 'Giden Ürün Onay';
+        }elseif ($val == 6) {
+            return 'Kargoya Verildi';
+        }elseif ($val == 7){
+            return 'İptal Edildi';
+        }elseif ($val == 8) {
+            return 'Eksik Ürün';
+        }
+    }
+}
+
+if (!function_exists('admin_order_status_color')) {
+    function admin_order_status_color($val='')
+    {
+        if ($val == 1) {
+            return 'metal';
+        }elseif ($val == 2) {
+            return 'info';
+        }elseif ($val == 3) {
+            return 'warning';
+        }elseif ($val == 4) {
+            return 'primary';
+        }elseif ($val == 5) {
+            return 'brand';
+        }elseif ($val == 6) {
+            return 'success';
+        }else{
+            return 'danger';
+        }
+    }
+}
+
+if (!function_exists('get_admin_order_status')) {
+    function get_admin_order_status()
+    {
+        return array(1 => 'Ödeme Onayında'
+                    ,2 => 'Tedarik Onayında'
+                    ,3 => 'Ürün Bekleniyor'
+                    ,4 => 'Gelen Ürün Onay'
+                    ,5 => 'Giden Ürün Onay'
+                    ,6 => 'Kargoya Verildi'
+                    ,7 => 'İptal Edildi'
+                    ,8 => 'Eksik Ürün');
+    }
+}
+
+if (!function_exists('get_payment_status')) {
+    function get_payment_status()
+    {
+        return array(1 => 'Ödeme Onay Bekliyor'
+                    ,2 => 'Ödeme Onaylandı'
+                    ,3 => 'Ödeme Onaylanmadı'
+                    ,4 => 'Ödeme İade Edildi');
+    }
+}
+
+if( !function_exists('ceiling') )
+{
+    function ceiling($number, $significance = 1)
+    {
+        return ( is_numeric($number) && is_numeric($significance) ) ? (ceil($number/$significance)*$significance) : false;
+    }
 }

@@ -39,5 +39,46 @@ class Core_Model extends CI_Model
 			return false;
 		}
 	}
+
+    public function getCarDetail($data)
+    {
+        $this->db->where('carId',$data->carId);
+        $this->db->order_by('id','DESC');
+        $this->db->limit(1);
+        $q = $this->db->get('carDetail');
+        if ($q->num_rows()>0) {
+            return $q->row();
+        }else{
+            return array();
+        }
+    }
+
+    public function getBildirimMails($id)
+    {
+        $this->db->where(array('id' => $id,'status' => 1));
+        $q = $this->db->get('bildirim_mail');
+        if ($q->num_rows() > 0) {
+            $mails = $q->row()->mails;
+            if (strstr($mails,',')) {
+                $mails = explode(',', $mails);
+            }else{
+                $mails = array($mails);
+            }
+
+            foreach ($mails as $key => $val) {
+                if (!filter_var($val, FILTER_VALIDATE_EMAIL)) {
+                    unset($mails[$key]);
+                }
+            }
+            
+            if (count($mails)>0) {
+                return $mails;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
 	
 }

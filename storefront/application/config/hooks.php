@@ -11,3 +11,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |	https://codeigniter.com/user_guide/general/hooks.html
 |
 */
+
+$hook['cache_override'] = [
+    'class' => 'EA_Cache',
+    'function' => 'display_cache',
+    'filename' => 'Cache.php',
+    'filepath' => 'hooks',
+];

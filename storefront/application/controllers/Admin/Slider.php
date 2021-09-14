@@ -64,7 +64,7 @@ class Slider extends Core_Controller
 	{
 		$header_data = new StdClass;
 		$header_data->mainMenu = 'Slider';
-		$header_data->subMenu  = 'SliderAdd';
+		$header_data->subMenu  = 'SliderList';
 
 
 		if ($this->input->post()) {

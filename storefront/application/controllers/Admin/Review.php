@@ -12,8 +12,8 @@
 		{
 			$header_data = new StdClass;
 			$data = new StdClass;
-			$header_data->mainMenu = "Review";
-			$header_data->subMenu = "reviewList";	
+			$header_data->mainMenu = "FeedBack";
+			$header_data->subMenu = "reviewListRe";	
 			
 			$data->reviewInformation = $this->RM->getModalReview();
 

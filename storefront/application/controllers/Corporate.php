@@ -7,16 +7,6 @@ class Corporate extends Core_Controller
 		parent::__construct();
 		$this->getUserRememberCheck();
 		$this->load->model('Corporate_model','CM');
-	}
-
-	public function index()
-	{
-		$data = new stdClass();
-		$data = $this->Global_model->getAllInsert();
-		$this->load->view('head',$data);
-		$this->load->view('header');
-		$this->load->view('about');
-		$this->load->view('footer');
 	}	
 
 	public function contact()
@@ -25,17 +15,7 @@ class Corporate extends Core_Controller
 		$data = $this->Global_model->getAllInsert();
 		$this->load->view('head',$data);
 		$this->load->view('header');
-		$this->load->view('contact');
-		$this->load->view('footer');
-	}
-
-	public function editorPage()
-	{
-		$data = new stdClass();
-		$data = $this->Global_model->getAllInsert();
-		$this->load->view('head',$data);
-		$this->load->view('header');
-		$this->load->view('editorPage');
+		$this->load->view('corporate_contact');
 		$this->load->view('footer');
 	}
 
@@ -46,7 +26,7 @@ class Corporate extends Core_Controller
 		$data->services = $this->CM->getContractedServices();
 		$this->load->view('head',$data);
 		$this->load->view('header');
-		$this->load->view('contracted');
+		$this->load->view('corporate_contracted');
 		$this->load->view('footer');
 	}
 	
@@ -117,10 +97,10 @@ class Corporate extends Core_Controller
 					$postData->image = $imageInformations['file_name'];
 					if ($this->CM->formAdd($postData)) {
 						$this->session->set_flashdata('success',1);
-						redirect(site_url('Corporate/insankaynaklari'));
+						redirect(site_url('insankaynaklari'));
 					} else {
 						$this->session->set_flashdata('danger',2);
-						redirect(site_url('Corporate/insankaynaklari'));
+						redirect(site_url('insankaynaklari'));
 					}
 				}
 			}
@@ -128,7 +108,7 @@ class Corporate extends Core_Controller
 
 		$this->load->view('head',$data);
 		$this->load->view('header');
-		$this->load->view('insankaynaklari');
+		$this->load->view('corporate_insankaynaklari');
 		$this->load->view('footer');
 	}
 
@@ -139,7 +119,7 @@ class Corporate extends Core_Controller
 		$data->accounts = $this->CM->getBankAccounts();
 		$this->load->view('head',$data);
 		$this->load->view('header');
-		$this->load->view('bank_account');
+		$this->load->view('corporate_bank_account');
 		$this->load->view('footer');
 	}
 
@@ -147,13 +127,47 @@ class Corporate extends Core_Controller
 	{
 		$data = new stdClass();
 		$data = $this->Global_model->getAllInsert();
+		$this->form_validation->set_rules('name_surname', 'Ad Soyad', 'required|min_length[3]|max_length[250]');
+		$this->form_validation->set_rules('email', 'E-Posta', 'required|min_length[5]|max_length[250]|valid_email');
+		$this->form_validation->set_rules('phone', 'Telefon', 'required|min_length[10]|max_length[14]|numeric');
+		$this->form_validation->set_rules('chasis_number', 'Şase No', 'required|min_length[17]|max_length[17]');
+		$this->form_validation->set_rules('brand', 'Marka', 'required|min_length[2]|max_length[250]');
+		$this->form_validation->set_rules('model', 'Model', 'required|min_length[3]|max_length[250]');
+		$this->form_validation->set_rules('body', 'Kasa', 'required|min_length[1]|max_length[250]');
+		$this->form_validation->set_rules('year', 'Yıl', 'required|min_length[4]|max_length[4]|numeric');
+		$this->form_validation->set_rules('engine_capacity', 'Motor Hacmi', 'required|min_length[1]|max_length[40]');
+		$this->form_validation->set_rules('at', 'Beygir', 'required|min_length[1]|max_length[40]');
+		$this->form_validation->set_rules('spare_part', 'Yedek Parça Listesi', 'required|min_length[1]');
+		$this->form_validation->set_rules('content', 'Eklemek İstedikleriniz', 'min_length[3]');
+		if (!$this->form_validation->run() == FALSE) {
+			$postData = $this->getAllPosts();
+			if (!empty($_FILES['user_file']['name'])) {
+				$config['upload_path'] = './assets/uploads/';
+				$config['allowed_types'] = 'bmp|gif|jpeg|jpg|jpe|jp2|png|tiff|tif';
+				$config['encrypt_name'] = TRUE;
+				$this->load->library('upload', $config);
+				if (!$this->upload->do_upload('user_file')) {
+					$this->session->set_flashdata('image_error',$this->upload->display_errors());
+				} else {
+					$imageInformations =  $this->upload->data();
+					$postData->image = 'assets/uploads/'.$imageInformations['file_name'];
+				}
+			}
+			if ($this->CM->offerFormAdd($postData)) {
+				$this->session->set_flashdata('success','Talebiniz Başarıyla Oluşturuldu, İncelenip Geri Dönüş Sağlanacak');
+				redirect(site_url('toplu-parca-teklifi'));
+			} else {
+				$this->session->set_flashdata('danger','Talebinizi Oluşturamıyoruz, Lütfen Daha Sonra Tekrar Deneyin');
+				redirect(site_url('toplu-parca-teklifi'));
+			}
+		}
 		$this->load->view('head',$data);
 		$this->load->view('header');
-		$this->load->view('offerForm');
+		$this->load->view('corporate_offerForm');
 		$this->load->view('footer');
 	}
 
-	public function destek()
+	public function support()
 	{
 		$data = new stdClass();
 		$this->checkUserLogin();
@@ -161,7 +175,7 @@ class Corporate extends Core_Controller
 		$data->supportRequests = $this->CM->getSupportRequests();
 		$this->load->view('head',$data);
 		$this->load->view('header');
-		$this->load->view('support');
+		$this->load->view('corporate_support');
 		$this->load->view('footer');
 	}
 
@@ -172,8 +186,31 @@ class Corporate extends Core_Controller
 		$data->faqs = $this->CM->getFaqs();
 		$this->load->view('head',$data);
 		$this->load->view('header');
-		$this->load->view('faq');
+		$this->load->view('corporate_faq');
 		$this->load->view('footer');
 	}
+
+    public function help($slug = '')
+    {
+        $data = new stdClass();
+        $data = $this->Global_model->getAllInsert();
+        $data->helps = $this->CM->getHelps();
+
+        //prex($data->helps);
+        $data->content = $this->CM->getHelpPost($slug);
+
+        if ($data->content == false) {
+            $this->output->set_status_header('404');
+            $this->load->view('head',$data);
+            $this->load->view('header');
+            $this->load->view('404');
+            $this->load->view('footer');
+        }else{
+            $this->load->view('head',$data);
+            $this->load->view('header');
+            $this->load->view('corporate_help');
+            $this->load->view('footer');
+        }
+    }
 }
 

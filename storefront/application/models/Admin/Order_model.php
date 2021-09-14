@@ -9,235 +9,164 @@ class Order_model extends Core_Model
 		parent::__construct();
 	}
 	
-	public function getList($sayfa)
+	public function getList($sayfa,$pageBy,$filter = '')
 	{
 		$data 		= new StdClass;
-		$pageBy 	= 10;//sayfada satır sayısı
 
-		if ($sayfa == 0 || $sayfa == 1) 
-		{
-			$this->db->limit($pageBy,0);
-			//$this->db->limit(2,0); 2 adet 0 dan itibaren
-		}
-		else
-		{
-			$sayfa 	= $sayfa-1;
-			$sayfa 	= $sayfa*$pageBy;
-			$this->db->limit($pageBy,$sayfa);
-		}
+        $this->db->select('o.*,u.name,u.surname,(SELECT SUM(count) FROM order_line WHERE order_id = o.id AND status_inside != 7) count,(SELECT SUM(price*count) FROM order_line WHERE order_id = o.id AND status_inside != 7) totalPrice');
+        
+        if ($filter != '') {
+            //prex($filter);
+            if (!empty(($filter->key))) {
+                $this->db->group_start();
+                    $this->db->or_like('o.id',$filter->key);
+                    $this->db->or_like('u.name',$filter->key);
+                    $this->db->or_like('u.surname',$filter->key);
+                    $this->db->or_like('u.phone',$filter->key);
+                    $this->db->or_like('u.email',$filter->key);
+                    $this->db->or_like('a.name',$filter->key);
+                    $this->db->or_like('a.gsm',$filter->key);
+                    $this->db->or_like('i.name',$filter->key);
+                    $this->db->or_like('a.gsm',$filter->key);
+                $this->db->group_end();
+            }
+            if ($filter->order_status != '') {
+                $this->db->where('o.order_status_inside',$filter->order_status);
+            }
 
-		$this->db->select("o.*, ol.adet, ol.toplam, u.name username, cur.code moneycode, a.definition, a.name person_name, a.content, a.country, a.city, a.town, a.post_code, a.identity_number, a.corporate, a.firm_name, a.tax_no, a.tax_admin, a.gsm, ia.definition idefinition, ia.name iperson_name, ia.content icontent, ia.country icountry, ia.city icity, ia.town itown, ia.post_code ipost_code, ia.identity_number iidentity_number, ia.corporate icorporate, ia.firm_name ifirm_name, ia.tax_no itax_no, ia.tax_admin itax_admin, ia.gsm igsm");
-		$this->db->from('orders o');
-		$this->db->join('(SELECT order_id, COUNT(*) adet, SUM(price) toplam FROM order_line GROUP BY order_id) ol', 'ol.order_id = o.id', 'left');
-		//$this->db->join('shipping_firm sf', 'sf.id = o.shipping_firm', 'left');
-		$this->db->join('users u', 'u.id = o.user_id', 'left');
-		$this->db->join('order_addresses a', 'a.id = o.address_id', 'left');
-		$this->db->join('order_addresses ia', 'ia.id = o.invoice_address_id', 'left');
-		$this->db->join('currency cur', 'cur.id = o.currency_id', 'left');
-		if ((int)$this->input->get('siparisno') > 0) {
-			$this->db->where('o.id', (int)$this->input->get('siparisno'));
-		} elseif (count($this->input->get()) > 1) {
-			if ($this->input->get('name', true) != "") 
-			{
-				$this->db->like('LOWER(u.name)', strtolower($this->input->get('name', true)), 'both');
-			}
-			if ($this->input->get('order_status', true)) 
-			{
-				$this->db->where('o.order_status', $this->input->get('order_status', true));
-			}
-			if ($this->input->get('payment_status', true)) 
-			{
-				$this->db->where('o.payment_status', $this->input->get('payment_status', true));
-			}
-			if ($this->input->get('delivery_status', true)) 
-			{
-				$this->db->where('o.delivery_status', $this->input->get('delivery_status', true));
-			}
-			if ($this->input->get('payment_type', true)) 
-			{
-				$this->db->where('o.payment_type', $this->input->get('payment_type', true));
-			}
-			if ($this->input->get('user_id', true)) 
-			{
-				$this->db->where('o.user_id', $this->input->get('user_id', true));
-			}
-		}
-		
-		$this->db->where('o.payment_type !=', 0);
+            if ($filter->payment_status != '') {
+                $this->db->where('o.payment_status',$filter->payment_status);
+            }
+        }
 
-		$this->db->order_by('o.id DESC');
-		$q 			= $this->db->get();
-		$data->list = $q->result();
-		// A12U957 - Sorgu sonucunda dönen toplam satır sayısı (Limitin dahil olmadığı)
-		$this->db->select("COUNT(o.id) c");
-		$this->db->from('orders o');
-		$this->db->join('(SELECT order_id, COUNT(*) adet, SUM(price) toplam FROM order_line GROUP BY order_id) ol', 'ol.order_id = o.id');
-		//$this->db->join('shipping_firm sf', 'sf.id = o.shipping_firm');
-		$this->db->join('users u', 'u.id = o.user_id', 'left');
-		$this->db->join('currency cur', 'cur.id = o.currency_id', 'left');
-		$this->db->where('o.payment_status !=', 0);
-		if ((int)$this->input->get('siparisno') > 0) {
-			$this->db->where('o.id', (int)$this->input->get('siparisno'));
-		} elseif (count($this->input->get()) > 1) 
-		{
-			if ($this->input->get('name', true) != "") 
-			{
-				$this->db->like('LOWER(u.name)', strtolower($this->input->get('name', true)), 'both');
-			}
-			if ($this->input->get('order_status', true)) 
-			{
-				$this->db->where('o.order_status', $this->input->get('order_status', true));
-			}
-			if ($this->input->get('payment_status', true)) 
-			{
-				$this->db->where('o.payment_status', $this->input->get('payment_status', true));
-			}
-			if ($this->input->get('delivery_status', true)) 
-			{
-				$this->db->where('o.delivery_status', $this->input->get('delivery_status', true));
-			}
-			if ($this->input->get('payment_type', true)) 
-			{
-				$this->db->where('o.payment_type', $this->input->get('payment_type', true));
-			}
-			if ($this->input->get('user_id', true)) 
-			{
-				$this->db->where('o.user_id', $this->input->get('user_id', true));
-			}
+        $this->db->where('o.order_status > 0');
+
+		if ($sayfa == 1){
+			$start = 0;
+		}else{
+			$start = ($sayfa-1)*$pageBy;
 		}
-		$dbcount = $this->db->get()->row();
-		// A12U957 - SON
-		$data->pageCount 	= $dbcount->c/$pageBy;
-		if ($q->num_rows() > 0)
-		{
-			return $data;
-		}
-		else 
-		{
-			return false;
-		}
+        
+        $this->db->join('order_addresses a','a.id = o.address_id');
+        $this->db->join('order_addresses i','i.id = o.invoice_address_id');
+        $this->db->limit($pageBy,$start);
+        $this->db->order_by('o.id','DESC');
+        $this->db->join('users u','u.id = o.user_id');
+        $q = $this->db->get('orders o');
+        //prex($this->db->last_query());
+        if ($q->num_rows()>0) {
+            return $q->result();
+        }else{
+            return array();
+        }
 	}
 
-	public function GetOrderById($id)
-	{
-		$this->db->select('o.*, u.name username, ol.toplam, ol.adet, a.definition, a.name address_person, a.content, a.country, a.city, a.town, a.post_code, a.identity_number, a.corporate, a.firm_name, a.tax_no, a.tax_admin, a.gsm, cur.code moneycode, ia.definition idefinition, ia.name iperson_name, ia.content icontent, ia.country icountry, ia.city icity, ia.town itown, ia.post_code ipost_code, ia.identity_number iidentity_number, ia.corporate icorporate, ia.firm_name ifirm_name, ia.tax_no itax_no, ia.tax_admin itax_admin, ia.gsm igsm');
-		$this->db->from('orders o');
-		$this->db->join('(SELECT order_id, COUNT(*) adet, SUM(price) toplam FROM order_line GROUP BY order_id) ol', 'ol.order_id = o.id', 'left');
-		//$this->db->join('shipping_firm sf', 'sf.id = o.shipping_firm');
-		$this->db->join('currency cur', 'cur.id = o.currency_id', 'left');
-		$this->db->join('users u', 'u.id = o.user_id', 'left');
-		$this->db->join('order_addresses a', 'a.id = o.address_id', 'left');
-		$this->db->join('order_addresses ia', 'ia.id = o.invoice_address_id', 'left');
-		$this->db->where('o.id', $id);
-		$q = $this->db->get();
-		$result = $q->row();
-		return $result;
-	}
+    public function orderCancel($id)
+    {
+        $this->db->where('id',$id);
+        $this->db->set(array('order_status' => 4,'order_status_inside' => 7));
+        $this->db->update('orders');
+    }
 
-	public function GetCityName($cityid)
-	{
-		$this->db->select("CityName");
-		$q = $this->db->get_where("location_cities", array("CityID" => $cityid));
-		if ($q->num_rows() > 0) {
-			$q = $q->row();
-			return $q->CityName;
-		} else {
-			return "";
-		}
-	}
+    public function missingProductSuccess($id)
+    {
+        $this->db->where(array('order_id' => $id,'status_inside' => 8));
+        $this->db->set(array('status_inside' => 7));
+        $this->db->update('order_line');
+        $this->db->query('CALL orderStatusChange();');
+        return true;
+    }
 
-	public function GetCountryName($countryid)
-	{
-		$this->db->select("CountryName");
-		$q = $this->db->get_where("location_countries", array("CountryID" => $countryid));
-		if ($q->num_rows() > 0) {
-			$q = $q->row();
-			return $q->CountryName;
-		} else {
-			return "";
-		}
-	}
+    public function getAllCount($filter = '')
+    {
+        if ($filter != '') {
+            if (!empty(($filter->key))) {
+                $this->db->group_start();
+                    $this->db->or_like('o.id',$filter->key);
+                    $this->db->or_like('u.name',$filter->key);
+                    $this->db->or_like('u.surname',$filter->key);
+                    $this->db->or_like('u.phone',$filter->key);
+                    $this->db->or_like('u.email',$filter->key);
+                    $this->db->or_like('a.name',$filter->key);
+                    $this->db->or_like('a.gsm',$filter->key);
+                    $this->db->or_like('i.name',$filter->key);
+                    $this->db->or_like('a.gsm',$filter->key);
+                $this->db->group_end();
+            }
+            if (!empty(trim($filter->order_status))) {
+                $this->db->where('o.order_status_inside',$filter->order_status);
+            }
 
-	public function GetTownName($countyid)
-	{
-		$this->db->select("CountyName");
-		$q = $this->db->get_where("location_counties", array("CountyID" => $countyid));
-		if ($q->num_rows() > 0) {
-			$q = $q->row();
-			return $q->CountyName;
-		} else {
-			return "";
-		}
-	}
+            if (!empty(($filter->payment_type))) {
+                $this->db->where('o.payment_type',$filter->payment_type);
+            }
+        }
+        $this->db->where('o.order_status > 0');
+        $this->db->join('order_addresses a','a.id = o.address_id');
+        $this->db->join('order_addresses i','i.id = o.invoice_address_id');
+        $this->db->join('users u','u.id = o.user_id');
 
-	public function GetOrderLineByOrderId($id)
-	{
-		$this->db->select('ol.*, p.product_name, cur.code moneycode');
-		$this->db->from('order_line ol');
-		$this->db->join('product_lang p', 'p.product_id = ol.product_id');
-		$this->db->join('currency cur', 'cur.id = ol.currency_id');
-		$this->db->where(array('ol.order_id' => $id, 'p.lang_id' => '1'));
-		$q = $this->db->get();
+        return $this->db->count_all_results('orders o');
+    }
 
-		if ($q->num_rows()>0) {
-			$q = $q->result();
-			foreach ($q as $key => $val) {
-				$variants = json_decode($val->selected_variants);
-				if ($val->product_id != 151) {
-					$this->db->select('v.id variant_id, vc.id variant_child_id, vl.name variant_child_name, vvl.name variant_name');
-					$this->db->where('vl.lang_id',1);
-					$this->db->where('vvl.lang_id',1);
-					$this->db->where_in('vc.id',$variants);
-					$this->db->from('variant_childs vc');
-					$this->db->join('variant_lang vl','vl.variant_child_id = vc.id');
-					$this->db->join('variants v','v.id = vc.variant_id');
-					$this->db->join('variant_lang vvl','v.id = vvl.variant_id');
-					$qq = $this->db->get();
-					if ($qq->num_rows()>0) {
-						$q[$key]->selected_variants = $qq->result();
-					}
-				}else{
-					$this->db->select('name');
-					$this->db->where(array('lang_id'=>1,'package_id'=> addslashes($variants[0]) ));
-					$qq = $this->db->get('package_lang');
+    public function getOrderId($id)
+    {
+        $this->db->select('*,(SELECT SUM(price*count) FROM order_line WHERE order_id = orders.id AND status_inside != 7) product_price,(SELECT SUM(count) FROM order_line WHERE order_id = orders.id AND status_inside != 7) count');
+        $this->db->where(array('id' => $id));
+        $q = $this->db->get('orders');
+        if ($q->num_rows()>0) {
+            $order = $q->row();
+            $q = $this->db->get_where('users',array('id' => $order->user_id));
+            if ($q->num_rows()>0) {
+                $order->user = $q->row();
+            }
 
-					if ($qq->num_rows()>0) {
-						$q[$key]->product_name = $qq->row()->name.' - '.UcWords($variants[1]).' Boy';
-					}else{
-						$q[$key]->product_name = "";
-					}
+            $order->address = false;
+            $order->invoice_address = false;
+            if ($order->address_id == $order->invoice_address_id) {
+                $this->db->select('o.*
+                                ,(SELECT CityName city FROM location_cities WHERE cityid = o.city) city_name
+                                ,(SELECT CountyName FROM location_counties WHERE countyid = o.town) town_name');
+                $this->db->where('o.id',$order->address_id);
+                $q = $this->db->get('order_addresses o');
+                if ($q->num_rows()>0) {
+                    $address = $q->row();
+                    $order->address = $address;
+                    $order->invoice_address = $address;
+                }
+            }else{
+                $this->db->select('o.*
+                                ,(SELECT CityName city FROM location_cities WHERE cityid = o.city) city_name
+                                ,(SELECT CountyName FROM location_counties WHERE countyid = o.town) town_name');
+                $this->db->where('o.id',$order->address_id);
+                $q = $this->db->get('order_addresses o');
+                if ($q->num_rows()>0) {
+                    $address = $q->row();
+                    $order->address = $address;
+                }
+                $this->db->select('o.*
+                                ,(SELECT CityName city FROM location_cities WHERE cityid = o.city) city_name
+                                ,(SELECT CountyName FROM location_counties WHERE countyid = o.town) town_name');
+                $this->db->where('o.id',$order->invoice_address_id);
+                $q = $this->db->get('order_addresses o');
+                if ($q->num_rows()>0) {
+                    $address = $q->row();
+                    $order->invoice_address = $address;
+                }
+            }
 
-					$packagetype = $this->PackageSizeConverter($variants[1]);
-
-
-					$this->db->select('pl.product_name');
-					$this->db->from('package_product pp');
-					$this->db->join('product_lang pl','pl.product_id = pp.product_id');
-					$this->db->where(array('pl.Lang_id'		=> Lang_id,
-										   'pp.size' 		=> $packagetype,
-										   'pp.package_id' 	=> addslashes($variants[0])
-											));
-					$qq = $this->db->get();
-					if ($qq->num_rows()>0) {
-						$a = array();
-						foreach ($qq->result() as $key2 => $val2) {
-							$a[] = (object)array('variant_id' => 0,
-										 'variant_child_id' => 0,
-										 'variant_child_name' => $val2->product_name,
-										 'variant_name' => 'Ürün'
-										 );
-						}
-						$q[$key]->selected_variants = $a;
-					}else{
-						$q[$key]->selected_variants = array();
-					}
-				}
-
-			}
-		}
-
-		return $q;
-	}
+            $this->db->where(array('order_id' => $order->id));
+            $q = $this->db->get('order_line');
+            if ($q->num_rows()>0) {
+                $order->lines = $q->result();
+            }else{
+                $order->lines = array();
+            }
+            return $order;
+        }else{
+            return false;
+        }
+    }
 
 	public function SetOrderStatus($id, $new)
 	{
@@ -247,36 +176,6 @@ class Order_model extends Core_Model
 	public function SetPaymentStatus($id, $new)
 	{
 		return $this->db->where('id', $id)->set('payment_status', $new)->update('orders');
-	}
-
-	public $orderStatusArr = array(
-		0 => array('text' => 'Ödeme Aşamasında', 'color' => ',info'),
-		1 => array('text' => 'Kargo fiyatı bekliyor', 'color' => 'metal'),
-		2 => array('text' => 'Onay bekliyor', 'color' => 'warning'),
-		3 => array('text' => 'İptal edildi', 'color' => 'danger'),
-		4 => array('text' => 'Tasarım sürecinde', 'color' => 'brand'),
-		5 => array('text' => 'Onaylandı', 'color' => 'success'),
-		6 => array('text' => 'Kargoya teslim edildi', 'color' => 'success'),
-		7 => array('text' => 'Teslim edildi', 'color' => 'Completed'),
-		8 => array('text' => 'Üretimde', 'color' => 'Waiting')
-	);
-
-	public $paymentTypeArr = array(
-		0 => 'Belirlenmedi',
-		1 => 'Kredi kartı',
-		2 => 'Havale / EFT',
-		3 => 'Western Union'
-	);
-
-	public function paymentStatusText($pay,$order)
-	{
-		if ($pay == 0 && $order == 3) {
-			return "Ödeme yapılmadı";
-		}
-		if ($pay == 0) {
-			return "Ödeme yapılmadı";
-		}
-		return "Ödeme yapıldı";
 	}
 
 	public function ChangeStatus($id, $status, $new)
@@ -289,97 +188,535 @@ class Order_model extends Core_Model
 		return $this->db->where('id', $id)->update('order_addresses', $newArr);
 	}
 
+    public function getOrdersByPaymentStatus()
+    {
+        $data       = new StdClass;
 
-	public function exportExcelData($records)
-	{
-		$heading = false;
-		if (!empty($records))
-			foreach ($records as $row) {
-				if (!$heading) {
-				// display field/column names as a first row
-				echo implode("\t", array_keys($row)) . "\n";
-				$heading = true;
-			}
-			echo implode("\t", ($row)) . "\n";
-		}
-	}
+        $this->db->select('o.*,u.name,u.surname,(SELECT SUM(count) FROM order_line WHERE order_id = o.id) count,(SELECT SUM(price*count) FROM order_line WHERE order_id = o.id) totalPrice');
 
-	public function fetchDataFromTable()
-	{
-		$query =$this->db->get('orders'); // fetch Data from table
+        $this->db->where('o.order_status > 0');
 
+        $this->db->where('payment_status',1);
+        $this->db->where('order_status_inside',1);
 
-		$this->db->select("o.*, ol.adet, ol.toplam, u.name username, cur.code moneycode, a.definition, a.name person_name, a.content, a.country, a.city, a.town, a.post_code, a.identity_number, a.gsm, ia.definition idefinition, ia.name iperson_name, ia.content icontent, ia.country icountry, ia.city icity, ia.town itown, ia.post_code ipost_code, ia.identity_number iidentity_number, ia.gsm igsm");
-		$this->db->from('orders o');
-		$this->db->join('(SELECT order_id, COUNT(*) adet, SUM(price) toplam FROM order_line GROUP BY order_id) ol', 'ol.order_id = o.id');
-		//$this->db->join('shipping_firm sf', 'sf.id = o.shipping_firm');
-		$this->db->join('users u', 'u.id = o.user_id');
-		$this->db->join('order_addresses a', 'a.id = o.address_id');
-		$this->db->join('order_addresses ia', 'ia.id = o.invoice_address_id');
-		$this->db->join('currency cur', 'cur.id = o.currency_id');
+        $this->db->order_by('o.id','ASC');
+        $this->db->join('users u','u.id = o.user_id');
+        $q = $this->db->get('orders o');
+        if ($q->num_rows()>0) {
+            return $q->result();
+        }else{
+            return array();
+        }
+    }
 
-		if (count($this->input->get()) > 1) {
-			if ($this->input->get('name', true) != "") {
-				$this->db->like('LOWER(u.name)', strtolower($this->input->get('name', true)), 'both');
-			}
-			if ($this->input->get('order_status', true)) {
-				$this->db->where('o.order_status', $this->input->get('order_status', true));
-			}
-			if ($this->input->get('payment_status', true)) {
-				$this->db->where('o.payment_status', $this->input->get('payment_status', true));
-			}
-			if ($this->input->get('delivery_status', true)) {
-				$this->db->where('o.delivery_status', $this->input->get('delivery_status', true));
-			}
-			if ($this->input->get('payment_type', true)) {
-				$this->db->where('o.payment_type', $this->input->get('payment_type', true));
-			}
-			if ($this->input->get('user_id', true)) {
-				$this->db->where('o.user_id', $this->input->get('user_id', true));
-			}
-		}
+    public function getCurrentOrdersSublyCheck()
+    {
+        $data       = new StdClass;
 
-		$this->db->order_by('id DESC');
-		$query = $this->db->get();
+        $this->db->select('ol.name,ol.stok_id,ol.cari_id,ol.url,SUM(ol.count) count,ol.price');
+        //$this->db->select('*');
 
+        $this->db->where('o.payment_status',2);
+        $this->db->where('o.order_status_inside',2);
+        $this->db->where('ol.status_inside',2);
 
+        $this->db->join('order_line ol','ol.order_id = o.id');
+        $this->db->group_by(array('ol.stok_id','ol.cari_id','ol.price'));
+        $q = $this->db->get('orders o');
+        //prex($this->db->last_query());
+        if ($q->num_rows()>0) {
+            //prex($q->result());
+            return $q->result();
+        }else{
+            return array();
+        }
+    }
 
-		$allData = $query->result_array();  // this will return all data into array
-		$dataToExports = [];
-		foreach ($allData as $data) {
-			$arrangeData['Şipariş No'] = $data['Id'];
-			$arrangeData['Sipariş Durumu'] = $this->orderStatusArr[$data['order_status']]['text'];
-			$arrangeData['Ödeme Durumu'] = $this->paymentStatusText($data['payment_status'], $data['order_status']);
-			$arrangeData['Ödeme Tipi'] = $this->paymentTypeArr[$data['payment_type']];
-			//$arrangeData['Kargo Firması'] = $data['kargoad'];
-			$arrangeData['Alıcı Adı'] = $data['username'];
-			$arrangeData['Sipariş Tarihi'] = dateparse($data['added_time']);
-			$arrangeData['Toplam Adet'] = $data['adet'];
-			$arrangeData['Toplam Tutar'] = $data['toplam'];
-			$dataToExports[] = $arrangeData;
-		}
-		// set header
-		$filename = "dataToExport.xls";
-		//$this->exportExcelData($dataToExports);
-		require "Excel_XML.php";
-		$xls = new Excel_XML;
-		$xls->addWorksheet('Sipariş Tablosu', $dataToExports);
-		$xls->sendWorkbook('data.xls');
-	}
+    public function getIncomingProducts()
+    {
+        $data       = new StdClass;
 
-	public function KargoDateUpdate($order_line_id,$date)
-	{
-		$this->db->where(array('Id'=> $order_line_id));
-		$this->db->set(array('tahmini_kargo' => $date));
-		$this->db->update('order_line');
-		return true;
-	}
-	public function ProductUpdate($order_line_id,$product_status)
-	{
-		$this->db->where(array('Id'=> $order_line_id));
-		$this->db->set(array('product_status' => $product_status));
-		$this->db->update('order_line');
-		return true;
-	}
+        $this->db->select('ol.name,ol.stok_id,ol.cari_id,ol.url,SUM(ol.count) count,ol.price');
+        $this->db->group_start();
+            $this->db->or_where('o.order_status_inside',2);
+            $this->db->or_where('o.order_status_inside',3);
+        $this->db->group_end();
+
+        $this->db->group_start();
+            $this->db->where('o.payment_status',2);
+            $this->db->where('ol.status_inside',3);
+        $this->db->group_end();
+
+        $this->db->join('order_line ol','ol.order_id = o.id');
+        $this->db->group_by(array('ol.stok_id','ol.cari_id','ol.price'));
+        $q = $this->db->get('orders o');
+        //prex($this->db->last_query());
+        if ($q->num_rows()>0) {
+            //prex($q->result());
+            return $q->result();
+        }else{
+            return array();
+        }
+    }
+
+    public function getOutgoingProducts()
+    {
+        $data       = new StdClass;
+
+        $this->db->select('ol.name,ol.stok_id,ol.cari_id,ol.url,SUM(ol.count) count,ol.price');
+        $this->db->group_start();
+            $this->db->or_where('o.order_status_inside',2);
+            $this->db->or_where('o.order_status_inside',3);
+            $this->db->or_where('o.order_status_inside',4);
+        $this->db->group_end();
+
+        $this->db->group_start();
+            $this->db->where('o.payment_status',2);
+            $this->db->where('ol.status_inside',4);
+        $this->db->group_end();
+
+        $this->db->join('order_line ol','ol.order_id = o.id');
+        $this->db->group_by(array('ol.stok_id','ol.cari_id','ol.price'));
+        $q = $this->db->get('orders o');
+        //prex($this->db->last_query());
+        if ($q->num_rows()>0) {
+            //prex($q->result());
+            return $q->result();
+        }else{
+            return array();
+        }
+    }
+
+    public function getMissinProducts()
+    {
+        $data       = new StdClass;
+
+        $this->db->select('o.*,u.name,u.surname,(SELECT SUM(count) FROM order_line WHERE order_id = o.id AND status_inside != 7) count,(SELECT SUM(price*count) FROM order_line WHERE order_id = o.id AND status_inside != 7) totalPrice');
+        $this->db->where('o.order_status_inside != 7');
+        $this->db->where('o.payment_status',2);
+        $this->db->where('ol.status_inside',8);
+        $this->db->join('order_line ol','ol.order_id = o.id');
+        $this->db->join('users u','o.user_id = u.id');
+        $this->db->group_by('o.id');
+        $q = $this->db->get('orders o');
+        if ($q->num_rows()>0) {
+            return $q->result();
+        }else{
+            return array();
+        }
+    }
+
+    public function getgoingCargoCheck()
+    {
+        $data       = new StdClass;
+
+        $this->db->select('o.*,u.name,u.surname,(SELECT SUM(count) FROM order_line WHERE order_id = o.id AND status_inside != 7) count,(SELECT SUM(price*count) FROM order_line WHERE order_id = o.id AND status_inside != 7) totalPrice');
+        $this->db->where('o.order_status_inside',5);
+        $this->db->where('o.payment_status',2);
+        $this->db->join('order_line ol','ol.order_id = o.id');
+        $this->db->join('users u','o.user_id = u.id');
+        $this->db->group_by('o.id');
+        $q = $this->db->get('orders o');
+        if ($q->num_rows()>0) {
+            return $q->result();
+        }else{
+            return array();
+        }
+    }
+
+    public function cancelOrderRefoundSuccess($id)
+    {
+        $this->db->where('id',$id);
+        $this->db->set('payment_status',4);
+        $this->db->update('orders');
+        return true;
+    }
+
+    public function getcancelOrderRefound()
+    {
+        $data       = new StdClass;
+
+        $this->db->select('o.*,u.name,u.surname,(SELECT SUM(count) FROM order_line WHERE order_id = o.id) count,(SELECT SUM(price*count) FROM order_line WHERE order_id = o.id) totalPrice');
+        $this->db->where('o.order_status_inside',7);
+        $this->db->where('o.payment_status',2);
+        $this->db->where('o.payment_type',1);
+        $this->db->join('order_line ol','ol.order_id = o.id');
+        $this->db->join('users u','o.user_id = u.id');
+        $this->db->group_by('o.id');
+        $q = $this->db->get('orders o');
+        if ($q->num_rows()>0) {
+            return $q->result();
+        }else{
+            return array();
+        }
+    }
+
+    public function goingCargoSuccess($id)
+    {
+        $this->db->where(array('order_id' => $id
+                              ,'status_inside' => 5
+                          ));
+        $this->db->set('status_inside',6);
+        $this->db->update('order_line');
+
+        $this->db->query('Update orders
+                            SET
+                                order_status_inside = 6, order_status = 3
+                            WHERE id IN (
+                                SELECT
+                                    a.order_id
+                                FROM
+                                    (SELECT order_id,SUM(count) count FROM order_line WHERE status_inside != 7 GROUP BY order_id) a
+                                INNER JOIN
+                                    (SELECT order_id,SUM(count) count FROM order_line WHERE status_inside = 6 GROUP BY order_id) g
+                                ON
+                                    a.order_id = g.order_id
+                                WHERE
+                                    a.count = g.count
+                            ) AND order_status != 4  AND order_status != 3;');
+    }
+
+    public function paymentSuccess($id)
+    {
+        $this->db->where(array('id' => $id,'payment_status' => 1,'order_status_inside' => 1));
+        $this->db->set(array('payment_status' => 2
+                            ,'order_status_inside' => 2));
+        $this->db->update('orders');
+        //prex($this->db->last_query());
+    }
+
+    public function paymentError($id)
+    {
+        $this->db->where(array('id' => $id,'payment_status' => 1,'order_status_inside' => 1));
+        $this->db->set(array('payment_status' => 3
+                            ,'order_status_inside' => 8));
+        $this->db->update('orders');
+    }
+
+    public function supplySuccess($cari,$stok)
+    {
+        $this->db->select('id');
+        $this->db->where(array('order_status_inside' => 2
+                         ,'payment_status' => 2));
+        $q = $this->db->get('orders');
+        if ($q->num_rows()>0) {
+            $orders = $q->result();
+            $a = array();
+            foreach ($orders as $key => $val) {
+                $a[] = $val->id;
+            }
+            $orders = $a;
+
+            $this->db->where(array('cari_id' => urldecode($cari)
+                              ,'stok_id' => urldecode($stok)
+                              ,'status_inside' => 2
+                            ));
+            $this->db->where_in('order_id',$orders);
+            $this->db->set(array('status_inside' => 3));
+            $this->db->update('order_line');
+            if ($this->db->affected_rows()>0) {
+                $this->db->query('Update orders
+                                    SET
+                                        order_status = 2, order_status_inside = 3
+                                    WHERE id IN (
+                                        SELECT a.order_id FROM
+                                            (SELECT order_id,SUM(count) count FROM order_line WHERE status_inside != 7 GROUP BY order_id) a
+                                        INNER JOIN
+                                            (SELECT order_id,SUM(count) count FROM order_line WHERE status_inside = 3 GROUP BY order_id) g
+                                        ON
+                                            a.order_id = g.order_id
+                                        WHERE
+                                            a.count = g.count
+                                    ) AND order_status != 4  AND order_status != 3 ;');
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    public function incomingSuccess($cari,$stok)
+    {
+        $this->db->select('id');
+
+        $this->db->group_start();
+            $this->db->or_where('order_status_inside', 2);
+            $this->db->or_where('order_status_inside', 3);
+        $this->db->group_end();
+        $this->db->where(array('payment_status' => 2));
+        $q = $this->db->get('orders');
+        if ($q->num_rows()>0) {
+            $orders = $q->result();
+            $a = array();
+            foreach ($orders as $key => $val) {
+                $a[] = $val->id;
+            }
+            $orders = $a;
+
+            $this->db->where(array('cari_id' => urldecode($cari)
+                              ,'stok_id' => urldecode($stok)
+                              ,'status_inside' => 3
+                          ));
+            $this->db->where_in('order_id',$orders);
+            $this->db->set(array('status_inside' => 4));
+            $this->db->update('order_line');
+            if ($this->db->affected_rows()>0) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    public function outGoingSuccess($cari,$stok)
+    {
+        $this->db->select('id');
+
+        $this->db->group_start();
+            $this->db->or_where('order_status_inside', 2);
+            $this->db->or_where('order_status_inside', 3);
+            $this->db->or_where('order_status_inside', 4);
+        $this->db->group_end();
+        $this->db->where(array('payment_status' => 2));
+        $q = $this->db->get('orders');
+        if ($q->num_rows()>0) {
+            $orders = $q->result();
+            $a = array();
+            foreach ($orders as $key => $val) {
+                $a[] = $val->id;
+            }
+            $orders = $a;
+
+            $this->db->where(array('cari_id' => urldecode($cari)
+                              ,'stok_id' => urldecode($stok)
+                              ,'status_inside' => 4
+                          ));
+            $this->db->where_in('order_id',$orders);
+            $this->db->set(array('status_inside' => 5));
+            $this->db->update('order_line');
+            if ($this->db->affected_rows()>0) {
+                $this->db->query('Update orders
+                                    SET
+                                        order_status_inside = 5
+                                    WHERE id IN (
+                                        SELECT
+                                            a.order_id
+                                        FROM
+                                            (SELECT order_id,SUM(count) count FROM order_line WHERE status_inside != 7 GROUP BY order_id) a
+                                        INNER JOIN
+                                            (SELECT order_id,SUM(count) count FROM order_line WHERE status_inside = 5 GROUP BY order_id) g
+                                        ON
+                                            a.order_id = g.order_id
+                                        WHERE
+                                            a.count = g.count
+                                    ) AND order_status != 4  AND order_status != 3;');
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function outGoingError($cari,$stok)
+    {
+        $this->db->select('id');
+
+        $this->db->group_start();
+            $this->db->or_where('order_status_inside', 2);
+            $this->db->or_where('order_status_inside', 3);
+            $this->db->or_where('order_status_inside', 4);
+        $this->db->group_end();
+        $this->db->where(array('payment_status' => 2));
+        $q = $this->db->get('orders');
+        if ($q->num_rows()>0) {
+            $orders = $q->result();
+            $a = array();
+            foreach ($orders as $key => $val) {
+                $a[] = $val->id;
+            }
+            $orders = $a;
+
+            $this->db->where(array('cari_id' => urldecode($cari)
+                              ,'stok_id' => urldecode($stok)
+                              ,'status_inside' => 4
+                          ));
+            $this->db->where_in('order_id',$orders);
+            $this->db->set(array('status_inside' => 8));
+            $this->db->update('order_line');
+            if ($this->db->affected_rows()>0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function incomingError($cari,$stok)
+    {
+        $this->db->select('id');
+
+        $this->db->group_start();
+            $this->db->or_where('order_status_inside', 2);
+            $this->db->or_where('order_status_inside', 3);
+        $this->db->group_end();
+        $this->db->where(array('payment_status' => 2));
+        $q = $this->db->get('orders');
+        if ($q->num_rows()>0) {
+            $orders = $q->result();
+            $a = array();
+            foreach ($orders as $key => $val) {
+                $a[] = $val->id;
+            }
+            $orders = $a;
+
+            $this->db->where(array('cari_id' => urldecode($cari)
+                              ,'stok_id' => urldecode($stok)
+                              ,'status_inside' => 3
+                          ));
+            $this->db->where_in('order_id',$orders);
+            $this->db->set(array('status_inside' => 8));
+            $this->db->update('order_line');
+            if ($this->db->affected_rows()>0) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public function supplyError($cari,$stok)
+    {
+        $this->db->select('id');
+        $this->db->where(array('order_status_inside' => 2
+                              ,'payment_status' => 2));
+        $q = $this->db->get('orders');
+        if ($q->num_rows()>0) {
+            $orders = $q->result();
+            $a = array();
+            foreach ($orders as $key => $val) {
+                $a[] = $val->id;
+            }
+            $orders = $a;
+
+            $this->db->where(
+                array('cari_id' => urldecode($cari)
+                      ,'stok_id' => urldecode($stok)
+                      ,'status_inside' => 2
+                )
+            );
+            $this->db->where_in('order_id',$orders);
+            $this->db->set(array('status_inside' => 8));
+            $this->db->update('order_line');
+            if ($this->db->affected_rows()>0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function getPreparingOrders()
+    {
+
+        $this->db->select('u.id user_id,o.id order_id,u.name,u.surname,u.phone,u.email');
+        $this->db->where(array('o.order_status' => 2, 'o.notification' => 0));
+        $this->db->from('orders o');
+        $this->db->join('users u','u.id=o.user_id');
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            return $q->result();
+        }else{
+            return array();
+        }
+    }
+
+    public function getCargoOrders()
+    {  
+        $this->db->select('u.id user_id,o.id order_id,u.name,u.surname,u.phone,u.email
+                ,(SELECT SUM(price*count) FROM order_line WHERE order_id = o.id) price
+                ,(SELECT CONCAT
+                    (content
+                    ," "
+                    ,(SELECT cityname FROM location_cities WHERE location_cities.cityid = order_addresses.city)
+                    ,"/"
+                    ,(SELECT countyname FROM location_counties WHERE location_counties.countyid = order_addresses.town)
+                ) FROM order_addresses WHERE id = o.address_id) address
+                ,(SELECT CONCAT
+                    (content
+                    ," "
+                    ,(SELECT cityname FROM location_cities WHERE location_cities.cityid = order_addresses.city)
+                    ,"/"
+                    ,(SELECT countyname FROM location_counties WHERE location_counties.countyid = order_addresses.town)
+                ) FROM order_addresses WHERE id = o.invoice_address_id) billing_address');
+        $this->db->where(array('o.order_status' => 3));
+        $this->db->where('o.notification <',2);
+        $this->db->from('orders o');
+        $this->db->join('users u','u.id=o.user_id');
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            $data = $q->result();
+            foreach ($data as $key => $val) {
+                $this->db->select('url,stok_id,name,price,count,kod3');
+                $this->db->where('order_id',$val->order_id);
+                $this->db->where('status_inside <',7);
+                $q = $this->db->get('order_line');
+                if ($q->num_rows()>0) {
+                    $data[$key]->products = $q->result();
+                }else{
+                    $data[$key]->products = array();
+                }
+            }
+
+            return $data;
+        }else{
+            return array();
+        }
+    }
+
+    public function getCancelOrders()
+    {
+        $this->db->select('u.id user_id,o.id order_id,u.name,u.surname,u.phone,u.email
+                ,(SELECT SUM(price*count) FROM order_line WHERE order_id = o.id) price
+                ,(SELECT CONCAT
+                    (content
+                    ," "
+                    ,(SELECT cityname FROM location_cities WHERE location_cities.cityid = order_addresses.city)
+                    ,"/"
+                    ,(SELECT countyname FROM location_counties WHERE location_counties.countyid = order_addresses.town)
+                ) FROM order_addresses WHERE id = o.address_id) address
+                ,(SELECT CONCAT
+                    (content
+                    ," "
+                    ,(SELECT cityname FROM location_cities WHERE location_cities.cityid = order_addresses.city)
+                    ,"/"
+                    ,(SELECT countyname FROM location_counties WHERE location_counties.countyid = order_addresses.town)
+                ) FROM order_addresses WHERE id = o.invoice_address_id) billing_address');
+        $this->db->where(array('o.order_status' => 4));
+        $this->db->where('o.notification <>',5);
+        $this->db->from('orders o');
+        $this->db->join('users u','u.id=o.user_id');
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            $data = $q->result();
+            foreach ($data as $key => $val) {
+                $this->db->select('url,stok_id,name,price,count,kod3');
+                $this->db->where('order_id',$val->order_id);
+                $q = $this->db->get('order_line');
+                if ($q->num_rows()>0) {
+                    $data[$key]->products = $q->result();
+                }else{
+                    $data[$key]->products = array();
+                }
+            }
+
+            return $data;
+        }else{
+            return array();
+        }
+    }
+
+    public function sendedNotification($order_id,$type)
+    {
+        $this->db->where(array('id' => $order_id));
+        $this->db->set(array('notification' => $type));
+        $this->db->update('orders');
+    }
 }
 ?>

@@ -18,13 +18,14 @@ class Statics extends Core_Controller
 	public function index()
 	{
 		$data = new StdClass;
-
-		$data->mainMenu = 'Statics';
-		$data->subMenu  = 'StaticsList';
+		$header_data = new stdClass();
+		$header_data->mainMenu 	 = 'Content';
+		$header_data->subMenu = 'StaticsList';
+		$header_data->lowerMenu = 'CorporateContent';
 
 		$data->list = $this->Statics_model->GetStaticPagesAll();
 
-		$this->load->view('Admin/header',$data);
+		$this->load->view('Admin/header',$header_data);
 		$this->load->view('Admin/statics_list', $data);
 		$this->load->view('Admin/footer');
 	}
@@ -53,8 +54,9 @@ class Statics extends Core_Controller
 	{
 		$data = new StdClass;
 		
-		$data->mainMenu = 'Statics';
-		$data->subMenu  = 'StaticsList';
+		$data->mainMenu 	 = 'Content';
+		$data->subMenu = 'StaticsList';
+		$data->lowerMenu = 'CorporateContent';
 		$data->id 		= $static_id;
 
 		$data->List = $this->Statics_model->GetAllStatics($static_id);
@@ -91,8 +93,9 @@ class Statics extends Core_Controller
 		$this->load->model('Admin/Language_model','Lang');
 
 		$data = new StdClass;
-		$data->mainMenu = 'Statics';
-		$data->subMenu  = 'StaticsAdd';
+		$data->mainMenu 	 = 'Content';
+		$data->subMenu = 'StaticsList';
+		$data->lowerMenu = 'CorporateContent';
 
 		$data->Langs = $this->Lang->GetLangListShortId();
 

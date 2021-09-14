@@ -17,8 +17,9 @@ class Human_resources extends Core_Controller
 	{
 		$header_data = new StdClass;
 		$data = new StdClass;
-		$header_data->mainMenu = 'Human_resources';
+		$header_data->mainMenu 	 = 'FeedBack';
 		$header_data->subMenu = 'list';
+		$header_data->lowerMenu = 'Human_resources';
 
 		$data->application = $this->Human_resources_model->getApplication();
 

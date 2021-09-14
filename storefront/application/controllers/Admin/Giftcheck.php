@@ -21,7 +21,7 @@ class Giftcheck extends Core_Controller
 		// Mevcut Kampanyalar
 
 		$data = new StdClass;
-		$data->mainMenu = 'Gift';
+		$data->mainMenu = 'Indirim';
 		$data->subMenu  = 'GiftList';
 
 		$data->list = $this->Gift_model->gegtGifts();
@@ -46,8 +46,8 @@ class Giftcheck extends Core_Controller
 	public function Add()
 	{
 		$data = new StdClass;
-		$data->mainMenu = 'Gift';
-		$data->subMenu  = 'GiftAdd';
+		$data->mainMenu = 'Indirim';
+		$data->subMenu  = 'GiftList';
 
 		$data->cur = $this->Gift_model->getCurrencyAll();
 

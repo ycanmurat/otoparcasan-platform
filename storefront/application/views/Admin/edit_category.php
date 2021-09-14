@@ -2,25 +2,35 @@
 	<div class="d-flex align-items-center">
 		<div class="mr-auto">
 			<h3 class="m-subheader__title m-subheader__title--separator">
-				Kategori Düzenle
+				Ürün Kategorisi Düzenle
 			</h3>
 			<ul class="m-subheader__breadcrumbs m-nav m-nav--inline">
-				<li class="m-nav__item m-nav__item--home">
-					<a href="<?=admin_url()?>" class="m-nav__link m-nav__link--icon">
-						<i class="m-nav__link-icon la la-home"></i>
-					</a>
-				</li>
-				<li class="m-nav__separator">
-					-
-				</li>
-				<li class="m-nav__item">
-					<a href="<?=admin_url('Category')?>" class="m-nav__link">
-						<span class="m-nav__link-text">
-							Kategoriler
-						</span>
-					</a>
-				</li>
-			</ul>
+                <li class="m-nav__item m-nav__item--home">
+                    <a href="<?=admin_url()?>" class="m-nav__link m-nav__link--icon">
+                        <i class="m-nav__link-icon la la-home"></i>
+                    </a>
+                </li>
+                <li class="m-nav__separator">
+                    >
+                </li>
+                <li class="m-nav__item">
+                    <a href="<?=admin_url('Product?s=1')?>" class="m-nav__link">
+                        <span class="m-nav__link-text">
+                        Ürünler
+                        </span>
+                    </a>
+                </li>
+                <li class="m-nav__separator">
+                    >
+                </li>
+                <li class="m-nav__item">
+                    <a href="<?=$this->agent->referrer()?>" class="m-nav__link">
+                        <span class="m-nav__link-text">
+                        Geri Dön
+                        </span>
+                    </a>
+                </li>
+            </ul>
 		</div>
 	</div>
 </div>
@@ -122,6 +132,12 @@
 									<textarea class="form-control m-input" rows="3" name="dvn" maxlength="450"><?=(!empty($categoryInfo->dvn))?$categoryInfo->dvn:''?></textarea>
 								</div>
 							<?php } ?>
+                            <div class="form-group m-form__group">
+                                <label for="category_heading">
+                                    Sıra
+                                </label>
+                                <input class="form-control m-input" type="number" value="<?=$categoryInfo->sort?>" name="sort">
+                            </div>
 						</div>
 					</div>
 					<div class="m-portlet__foot m-portlet__foot--fit">

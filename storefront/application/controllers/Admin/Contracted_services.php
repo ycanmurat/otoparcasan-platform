@@ -17,8 +17,9 @@ class Contracted_services extends Core_Controller
 	{
 		$data = new StdClass();
 		$header_data = new StdClass();
-		$header_data->mainMenu = 'Contracted_services';
-		$header_data->subMenu  = 'servicesAdd';
+		$header_data->mainMenu 	 = 'Content';
+		$header_data->subMenu = 'servicesList';
+		$header_data->lowerMenu = 'CorporateContent';
 		if ($this->input->post()) {
 			$postData = $this->getAllPosts();
 			if ($this->CM->addServices($postData)) {
@@ -38,8 +39,10 @@ class Contracted_services extends Core_Controller
 	{
 		$data = new StdClass();
 		$header_data = new StdClass();
-		$header_data->mainMenu = 'Contracted_services';
-		$header_data->subMenu  = 'servicesList';
+
+		$header_data->mainMenu 	 = 'Content';
+		$header_data->subMenu = 'servicesList';
+		$header_data->lowerMenu = 'CorporateContent';
 
 		$data->list = $this->CM->getServices();
 
@@ -70,8 +73,9 @@ class Contracted_services extends Core_Controller
 	{
 		$data = new StdClass();
 		$header_data = new StdClass();
-		$header_data->mainMenu = 'Contracted_services';
-		$header_data->subMenu  = 'servicesList';
+		$header_data->mainMenu 	 = 'Content';
+		$header_data->subMenu = 'servicesList';
+		$header_data->lowerMenu = 'CorporateContent';
 		if ($this->input->post()) {
 			$postData = $this->getAllPosts();
 			if ($this->CM->updateServices($postData,$id)) {

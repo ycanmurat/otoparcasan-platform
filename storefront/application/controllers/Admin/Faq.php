@@ -13,8 +13,9 @@ class Faq extends Core_Controller
 	{
 		$header_data = new StdClass;
 		$data = new StdClass;
-		$header_data->mainMenu = 'Faq';
+		$header_data->mainMenu 	 = 'Content';
 		$header_data->subMenu = 'faqList';
+		$header_data->lowerMenu = 'CorporateContent';
 		$data->getFaq = $this->Faq_model->getFaq();
 		$this->load->view('Admin/header',$header_data);
 		$this->load->view('Admin/faq',$data);
@@ -25,8 +26,9 @@ class Faq extends Core_Controller
 	{
 		$header_data 			= new StdClass;
 		$data 		 			= new StdClass;
-		$header_data->mainMenu 	= 'Faq';
-		$header_data->subMenu 	= 'faqAdd';
+		$header_data->mainMenu 	 = 'Content';
+		$header_data->subMenu = 'faqList';
+		$header_data->lowerMenu = 'CorporateContent';
 		if ($this->input->post()) {
 			$getAllPosts = $this->getAllPosts();
 			if ($this->Faq_model->insertQuestion($getAllPosts)) {
@@ -69,8 +71,9 @@ class Faq extends Core_Controller
 	{
 		$header_data 			= new StdClass;
 		$data 		 			= new StdClass;
-		$header_data->mainMenu 	= 'Faq';
-		$header_data->subMenu 	= 'FaqList';
+		$header_data->mainMenu 	 = 'Content';
+		$header_data->subMenu = 'faqList';
+		$header_data->lowerMenu = 'CorporateContent';
 		if ($this->input->post()) {
 			$getAllPosts = $this->getAllPosts();
 			if ($this->Faq_model->updateQuestion($id,$getAllPosts)) {

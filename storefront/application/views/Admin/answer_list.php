@@ -2,19 +2,39 @@
 	<div class="d-flex align-items-center">
 		<div class="mr-auto">
 			<h3 class="m-subheader__title m-subheader__title--separator">
-				Hazır Yanıtlar
+				Hazır Yanıt Yönetimi
 			</h3>
 			<ul class="m-subheader__breadcrumbs m-nav m-nav--inline">
-				<li class="m-nav__item m-nav__item--home">
-					<a href="<?=admin_url()?>" class="m-nav__link m-nav__link--icon">
-						<i class="m-nav__link-icon la la-home"></i>
-					</a>
-				</li>
-			</ul>
+                <li class="m-nav__item m-nav__item--home">
+                    <a href="<?=admin_url()?>" class="m-nav__link m-nav__link--icon">
+                        <i class="m-nav__link-icon la la-home"></i>
+                    </a>
+                </li>
+                <li class="m-nav__separator">
+                    >
+                </li>
+                <li class="m-nav__item">
+                    <a href="<?=admin_url('Comment')?>" class="m-nav__link">
+                        <span class="m-nav__link-text">
+                        Geri Bildirim Yönetimi
+                        </span>
+                    </a>
+                </li>
+                <li class="m-nav__separator">
+                    >
+                </li>
+                <li class="m-nav__item">
+                    <a href="<?=$this->agent->referrer()?>" class="m-nav__link">
+                        <span class="m-nav__link-text">
+                        Geri Dön
+                        </span>
+                    </a>
+                </li>
+            </ul>
 		</div>
 		<div style="margin-right:10px;">
 			<div>
-				<button type="button" class="btn m-btn--air btn-warning" onclick="window.location = '<?=site_url('Admin/Comment/answerAdd')?>'">Ekle</button>
+				<button type="button" class="btn m-btn--air btn-warning" onclick="window.location = '<?=site_url('Admin/Comment/answerAdd')?>'">Hazır Yanıt Ekle</button>
 			</div>
 		</div>
 	</div>

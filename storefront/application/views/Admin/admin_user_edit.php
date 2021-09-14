@@ -2,15 +2,35 @@
 	<div class="d-flex align-items-center">
 		<div class="mr-auto">
 			<h3 class="m-subheader__title m-subheader__title--separator">
-				Yönetici Kullanıcıları Düzenle
+				Yöneticileri Listele
 			</h3>
 			<ul class="m-subheader__breadcrumbs m-nav m-nav--inline">
-				<li class="m-nav__item m-nav__item--home">
-					<a href="<?=admin_url()?>" class="m-nav__link m-nav__link--icon">
-						<i class="m-nav__link-icon la la-home"></i>
-					</a>
-				</li>
-			</ul>
+                <li class="m-nav__item m-nav__item--home">
+                    <a href="<?=admin_url()?>" class="m-nav__link m-nav__link--icon">
+                        <i class="m-nav__link-icon la la-home"></i>
+                    </a>
+                </li>
+                <li class="m-nav__separator">
+                    >
+                </li>
+                <li class="m-nav__item">
+                    <a href="<?=admin_url('AdminUserEdit')?>" class="m-nav__link">
+                        <span class="m-nav__link-text">
+                        Yöneticiler
+                        </span>
+                    </a>
+                </li>
+                <li class="m-nav__separator">
+                    >
+                </li>
+                <li class="m-nav__item">
+                    <a href="<?=$this->agent->referrer()?>" class="m-nav__link">
+                        <span class="m-nav__link-text">
+                        Geri Dön
+                        </span>
+                    </a>
+                </li>
+            </ul>
 		</div>
 		<div>
 			<div>
@@ -25,7 +45,7 @@
 			<div class="m-portlet">
 				<div class="m-portlet__body">
 					<?if ($this->session->flashdata('true') == 1){?>
-						<div class="alert alert-success alert-dismissible fade show" style="margin-left: 20px;margin-right: 20px" role="alert">
+						<div class="alert alert-success alert-dismissible fade show" role="alert">
 							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 							</button>
 							<strong>
@@ -34,13 +54,31 @@
 							Kullanıcı Yetkisi Başarıyla Atandı
 						</div>
 					<?}elseif($this->session->flashdata('delete') == 1){?>
-						<div class="alert alert-success alert-dismissible fade show" style="margin-left: 20px;margin-right: 20px" role="alert">
+						<div class="alert alert-success alert-dismissible fade show" role="alert">
 							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 							</button>
 							<strong>
 							İşlem Başarılı !
 							</strong>
 							Kullanıcı Başarıyla Silindi
+						</div>
+					<?}elseif($this->session->flashdata('yetki')){?>
+						<div class="alert alert-danger alert-dismissible fade show" role="alert">
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							</button>
+							<strong>
+							İşlem Başarısız !
+							</strong>
+							Bu Kullanıcıyı Silmeye Yetkiniz Yok
+						</div>
+					<?}elseif($this->session->flashdata('yetki2')){?>
+						<div class="alert alert-danger alert-dismissible fade show" role="alert">
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							</button>
+							<strong>
+							İşlem Başarısız !
+							</strong>
+							Bu Kullanıcıyı Kapatmaya Yetkiniz Yok
 						</div>
 					<?}?>
 					<!--begin: Datatable -->
@@ -91,12 +129,14 @@
 										<?=$user_info->user_mail?>
 									</td>
 									<td>
+										<?if($user_info->Id != 3 && $user_info->Id != 29) {?>
 										<span class="m-switch m-switch--outline m-switch--icon m-switch--success">
 											<label>
 												<input type="checkbox" <?=($user_info->status==1?'checked="checked"':'')?> onclick="window.location='<?=site_url('Admin/AdminUserEdit/StatusEdit/'.$user_info->Id.'/'.$NowStatus)?>'">
 												<span></span>
 											</label>
 										</span>
+										<?}?>
 									</td>
 									<td style="padding: 15px;">
 										<?=$user_info->user_gsm?>
@@ -108,7 +148,9 @@
 											</button>
 											<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 												<a href="AdminUserEdit/UpdateUser/<?=$user_info->Id?>" class="dropdown-item btn-sm text-black">Düzenle</a>
+												<?if($user_info->Id != 3 && $user_info->Id != 29) {?>
 												<a href="javascript:void(0);" class="dropdown-item bg-danger text-white" onclick="deleteConfirm('AdminUserEdit/DeleteUser/<?=$user_info->Id?>')">Sil</a>
+												<?}?>
 											</div>
 										</div>
 									</td>

@@ -2,24 +2,34 @@
 	<div class="d-flex align-items-center">
 		<div class="mr-auto">
 			<h3 class="m-subheader__title m-subheader__title--separator">
-				Statik Sayfa Oluştur
+				Sabit Sayfa Oluştur
 			</h3>
 			<ul class="m-subheader__breadcrumbs m-nav m-nav--inline">
-				<li class="m-nav__item m-nav__item--home">
-					<a href="<?=site_url()?>Admin/" class="m-nav__link m-nav__link--icon">
-						<i class="m-nav__link-icon la la-home"></i>
-					</a>
-				</li>
-				<li class="m-nav__separator">
-					-
-				</li>
-				<li class="m-nav__item">
-					<a href="<?=admin_url('Statics')?>" class="m-nav__link">
-						<span class="m-nav__link-text">
-							Statik Sayfalar
-						</span>
-					</a>
-				</li>
+			    <li class="m-nav__item m-nav__item--home">
+			        <a href="<?=admin_url()?>" class="m-nav__link m-nav__link--icon">
+			            <i class="m-nav__link-icon la la-home"></i>
+			        </a>
+			    </li>
+			    <li class="m-nav__separator">
+			        >
+			    </li>
+			    <li class="m-nav__item">
+			        <a href="<?=admin_url('Sellers')?>" class="m-nav__link">
+			            <span class="m-nav__link-text">
+			            Site İçerik Yönetimi
+			            </span>
+			        </a>
+			    </li>
+			    <li class="m-nav__separator">
+			        >
+			    </li>
+			    <li class="m-nav__item">
+			        <a href="<?=$this->agent->referrer()?>" class="m-nav__link">
+			            <span class="m-nav__link-text">
+			            Geri Dön
+			            </span>
+			        </a>
+			    </li>
 			</ul>
 		</div>
 	</div>
@@ -71,12 +81,7 @@
 									<label for="exampleSelect1">
 										Sayfa İçeriği - <?=$val->short_code?>
 									</label>
-									<div class="md-editor active">
-										<textarea class="form-control md-input" data-provide="markdown" name="content_text[<?=$val->id?>]" rows="10" style="resize: none;"></textarea>
-										<div class="md-fullscreen-controls">
-											<a class="exit-fullscreen" href="#" title="Exit fullscreen"><span class="fa fa-compress"></span></a>
-										</div>
-									</div>
+									<textarea class="form-control" name="content_text[<?=$val->id?>]" id="ckeditor" rows="10" style="resize: none;"></textarea>
 								</div>
 							<?php } ?>
 						</div>
@@ -98,3 +103,6 @@
 		</div>
 	</div>
 </div>
+<script>
+    CKEDITOR.replace('ckeditor');
+</script>

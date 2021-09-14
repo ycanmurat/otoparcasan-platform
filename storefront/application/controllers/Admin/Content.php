@@ -17,8 +17,9 @@ class Content extends Core_Controller
 	{
 		$header_data = new StdClass;
 		$data = new StdClass;
-		$header_data->mainMenu = 'Content';
-		$header_data->subMenu = 'contentEdit';
+		$header_data->mainMenu 	 = 'Content';
+		$header_data->subMenu = 'aboutEdit';
+		$header_data->lowerMenu = 'HomePageContent';
 		$data->content = $this->Content_model->getContent();
 		if ($this->input->post()) {
 			$getAllPosts = $this->getAllPosts();
@@ -44,8 +45,9 @@ class Content extends Core_Controller
 	{
 		$header_data = new StdClass;
 		$data = new StdClass;
-		$header_data->mainMenu = 'Content';
-		$header_data->subMenu = 'contentAdd';
+		$header_data->mainMenu 	 = 'Content';
+		$header_data->subMenu = 'biyografiEdit';
+		$header_data->lowerMenu = 'HomePageContent';
 		$data->otoparcasan = $this->Content_model->getOtoparcasan();
 		if ($this->input->post()) {
 			$getAllPosts = $this->getAllPosts();

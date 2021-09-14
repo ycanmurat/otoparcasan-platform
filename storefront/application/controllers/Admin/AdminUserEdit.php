@@ -28,17 +28,54 @@
 			$this->load->view('Admin/admin_user_edit',$data);
 			$this->load->view('Admin/footer');
 		}
+
+        public function mail()
+        {
+            $data             = new StdClass;
+            $data->mainMenu   = 'AdminEdit';
+            $data->subMenu    = 'YoneticiMail';
+
+            if ($this->input->post()) {
+                $postData = (array)array_optimize(reverseArray($this->getAllPosts()));
+                $result = array();
+                foreach ($postData as $key => $val) {
+                    $result[$key] = new StdClass;
+                    $result[$key]->mails = $val->mail; 
+                    $result[$key]->id = $key; 
+                    if (isset($val->status)) {
+                        $result[$key]->status = 1;
+                    }else{
+                        $result[$key]->status = 0;
+                    }
+                }
+                $this->Admin_user_model->update_mail($result);
+                redirect(current_url());
+            }
+
+
+            $data->mails = $this->Admin_user_model->getMails();
+            
+            $this->load->view('Admin/header', $data);
+            $this->load->view('Admin/admin_mail_group');
+            $this->load->view('Admin/footer');
+        }
+
 		public function StatusEdit($Id = 0, $NowStatus = 0)
-		{
-			if ($Id == 0 || ($NowStatus != 0 && $NowStatus != 1)) {
-				redirect(admin_url('AdminUserEdit'));
-			}
-			$this->Admin_user_model->StatusEditM($Id, $NowStatus);
-			try {
+		{	
+			if ($Id != 3 && $Id != 29) {
+				if ($Id == 0 || ($NowStatus != 0 && $NowStatus != 1)) {
+					redirect(admin_url('AdminUserEdit'));
+				}
 				$this->Admin_user_model->StatusEditM($Id, $NowStatus);
-				redirect($_SERVER['HTTP_REFERER']);
-			} catch (Exception $e) {
-				redirect($_SERVER['HTTP_REFERER']);
+				try {
+					$this->Admin_user_model->StatusEditM($Id, $NowStatus);
+					redirect($_SERVER['HTTP_REFERER']);
+				} catch (Exception $e) {
+					redirect($_SERVER['HTTP_REFERER']);
+				}
+			} else {
+				$this->session->set_flashdata('yetki2',1);
+				redirect(admin_url('AdminUserEdit'));
 			}
 		}
 		public function AuthEdit($Auth = 0, $Id = 0)
@@ -59,8 +96,8 @@
 		{
 			$header_data 			= new StdClass;
 			$data 					= new StdClass;
-			$header_data->mainMenu 	= 'AdminEdit';
-			$header_data->subMenu  	= 'newAdminAdd';
+			$header_data->mainMenu 	 = 'AdminEdit';
+			$header_data->subMenu  	 = 'AdminUserEdit';
 			$adminInfo 				= new StdClass;
 			$data->is_there 		= "1";
 			$data->admin_add_true	= "3";
@@ -92,16 +129,21 @@
 		}
 		public function DeleteUser($Id)
 		{	
-			if (!empty($Id) || ctype_digit($Id)){
-				$data->delete_info = $this->Admin_user_model->DeleteUser($Id);
-				if (!$delete_info == false) {
-					$this->session->set_flashdata('delete',1);
-				} else {
+			if ($Id != 3 && $Id != 29) {
+				if (!empty($Id) || ctype_digit($Id)){
+					$data->delete_info = $this->Admin_user_model->DeleteUser($Id);
+					if (!$delete_info == false) {
+						$this->session->set_flashdata('delete',1);
+					} else {
+						redirect(admin_url('AdminUserEdit'));
+					}
+				}
+				else {
 					redirect(admin_url('AdminUserEdit'));
 				}
-			}
-			else {
-				redirect(admin_url('Admin'));
+			} else {
+				$this->session->set_flashdata('yetki',1);
+				redirect(admin_url('AdminUserEdit'));
 			}
 		}
 		public function UpdateUser($Id)

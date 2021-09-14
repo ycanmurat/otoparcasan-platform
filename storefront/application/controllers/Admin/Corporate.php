@@ -15,8 +15,9 @@ class Corporate extends Core_Controller
 	{
 		$header_data 			 = new StdClass;
 		$data 					 = new StdClass;
-		$header_data->mainMenu 	 = 'homeVideo';
-		$header_data->subMenu  	 = 'videoEdit';
+		$header_data->mainMenu = 'Content';
+		$header_data->subMenu  = 'videoEdit';
+		$header_data->lowerMenu = 'HomePageContent';
 		$data->info = $this->Corporate_model->getHomeVideo();
 		if ($this->input->post()) {
 			$getAllPosts = $this->getAllPosts();

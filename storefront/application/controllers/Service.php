@@ -8,37 +8,130 @@ class Service extends Core_Controller
 	{
 		parent::__construct();
 		$this->load->model('Dat_model','dat');
+        $this->load->model('Category_model','cat');
+		$this->load->model('Service_model','SM');
 	}
+
+    public function addCarData()
+    {
+        $carSelectDetail = $this->getAllPosts();
+
+        $this->db->insert('carDetail',$carSelectDetail);
+        echo 'OK';
+    }
 
 	public function getTypes()
 	{
-		echo json_encode($this->dat->getCarMarks());
+        $data->list = array_optimize($this->dat->getCarMarks());
+        $data->dbList = $this->SM->getCarTypes();
+
+        $newAry = array();
+        foreach ($data->list as $key => $val) {
+            $i = 0;
+            foreach ($data->dbList as $key2 => $val2) {
+                if ($val->key == $val2->key) {
+                    $i++;
+                    $newAry[] = $val2;
+                }
+            }
+            if ($i == 0) {
+                $val->status    = 1;
+                $val->popular   = 0;
+                $val->icon      = '';
+                $newAry[] = $val;
+            }
+        }
+		echo json_encode($newAry);
 	}
 
 	public function getBrands($type = '',$year = '')
 	{
 		if ($type>0 AND $type<6) {
-			echo json_encode($this->dat->getBrands($type,$year));
+            $data = new StdClass;
+            $data->list = array_optimize($this->dat->getBrands($type));
+            $data->dbList = $this->SM->getCarBrands($type);
+
+            $newAry = array();
+            foreach ($data->list as $key => $val) {
+                $i = 0;
+                foreach ($data->dbList as $key2 => $val2) {
+                    if ($val->key == $val2->key) {
+                        $i++;
+                        $newAry[] = $val2;
+                    }
+                }
+                if ($i == 0) {
+                    $val->status    = 1;
+                    $val->popular   = 0;
+                    $val->icon      = '';
+                    $newAry[] = $val;
+                }
+            }
+			echo json_encode($newAry);
 		}else{
 			echo 'error';
 		}
-
 	}
 
 	public function getModels($type = '',$brand = '',$year = '')
 	{
 		if ($type>0 AND $type<6) {
-			echo json_encode($this->dat->getModels($type,$brand,$year));
+            $data = new StdClass;
+            $data->list = array_optimize($this->dat->getModels($type,$brand));
+            $data->dbList = $this->SM->getCarModels($type,$brand);
+
+            $newAry = array();
+            foreach ($data->list as $key => $val) {
+                $i = 0;
+                foreach ($data->dbList as $key2 => $val2) {
+                    if ($val->key == $val2->key) {
+                        $i++;
+                        $newAry[] = $val2;
+                    }
+                }
+                if ($i == 0) {
+                    $val->status    = 1;
+                    $val->popular   = 0;
+                    $val->icon      = '';
+                    $newAry[] = $val;
+                }
+            }
+            usort($newAry, function($a, $b) {
+                return $a->value <=> $b->value;
+            });
+            echo json_encode($newAry);
 		}else{
 			echo 'error';
 		}
-
 	}
 
 	public function getSubModels($type = '',$brand = '',$model = '',$year ='')
 	{
 		if ($type>0 AND $type<6 AND $brand != '' AND $model != '') {
-			echo json_encode($this->dat->getSubModels($type,$brand,$model,$year));
+            $data = new StdClass;
+            $data->list = array_optimize($this->dat->getSubModels($type,$brand,$model));
+            $data->dbList = $this->SM->getCarSubModels($type,$brand,$model);
+
+            $newAry = array();
+            foreach ($data->list as $key => $val) {
+                $i = 0;
+                foreach ($data->dbList as $key2 => $val2) {
+                    if ($val->key == $val2->key) {
+                        $i++;
+                        $newAry[] = $val2;
+                    }
+                }
+                if ($i == 0) {
+                    $val->status    = 1;
+                    $val->popular   = 0;
+                    $val->icon      = '';
+                    $newAry[] = $val;
+                }
+            }
+            usort($newAry, function($a, $b) {
+                return $a->value <=> $b->value;
+            });
+            echo json_encode($newAry);
 		}else{
 			echo 'error';
 		}
@@ -87,9 +180,13 @@ class Service extends Core_Controller
 		$posts = $this->getAllPosts();
 		$this->load->model('Garage_model');
 
-		if ($this->Garage_model->addGarrage($posts)) {
+        $result = $this->Garage_model->addGarrage($posts);
+		if ($result == 1) {
+            $this->session->set_flashdata('addingGarrage',1);
 			echo 'OK';
-		}else{
+		}elseif ($result == 2) {
+            echo 'Usr';
+        }else{
 			echo 'Err';
 		}
 	}
@@ -113,13 +210,14 @@ class Service extends Core_Controller
 		$this->load->model('Garage_model');
 
 		$data = $this->dat->getVinRequest($vin);
-		//prex($data->result[0]);
-
-		if (is_array($data->result[0])) {
-			$data->image 	=  $this->Garage_model->getCarImage($data->result[0]['ns1VehicleType'],$data->result[0]['ns1Manufacturer'],$data->result[0]['ns1BaseModel']);
-		}else{
-			$data->image 	=  $this->Garage_model->getCarImage($data->result[0]->ns1VehicleType,$data->result[0]->ns1Manufacturer,$data->result[0]->ns1BaseModel);
-		}
+        //prex($data);
+        if ($data['status'] == 'true') {
+            if (is_array($data['data']->result[0])) {
+                $data['data']->image    =  $this->Garage_model->getCarImage($data['data']->result[0]['VehicleType'],$data['data']->result[0]['Manufacturer'],$data['data']->result[0]['BaseModel']);
+            }else{
+                $data['data']->image    =  $this->Garage_model->getCarImage($data['data']->result[0]->VehicleType,$data['data']->result[0]->Manufacturer,$data['data']->result[0]->BaseModel);
+            }
+        }
 		echo json_encode($data);
 	}
 }

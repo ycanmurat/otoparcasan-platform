@@ -5,8 +5,14 @@ class Home extends Core_Controller
 	function __construct()
 	{
 		parent::__construct();
-		$this->load->model('Home_model','HM');
+        $this->load->model('Home_model','HM');
+		$this->load->model('Service_model','SM');
 		$this->getUserRememberCheck();
+        /*
+        if (is_null($this->session->userdata('userInfo')) || is_null(@get_cookie('selectedCar'))) {
+            $this->output->cache(10);
+        }
+        */
 	}
 
 	public function index()
@@ -18,19 +24,11 @@ class Home extends Core_Controller
 		$data = $this->Global_model->getAllInsert();
 		$data->dat = new StdClass;
 
-		$data->dat->types = $this->dat->getCarMarks();
-
-		//prex($data->dat);
-		if (count((array)$data->dat->types[0]) == 2) {
-			$data->dat->first = true;
-		}else{
-			$data->dat->first = false;
-		}
+		$data->dat->types = $this->SM->getCarTypes();
 
 		if (null !== ($this->input->cookie('selectedCar'))) {
 			$selectedCar = json_decode($this->input->cookie('selectedCar'));
 			$data->carDetail = $this->dat->getCarDetail($selectedCar);
-			//$data->carImage = $this->getCarImage($data->carDetail->Vehicle->VehicleType,$data->carDetail->Vehicle->Manufacturer,$data->carDetail->Vehicle->BaseModel);
 		}
 
 		$data->mobileSliders = $this->HM->getMobileSlider();
@@ -50,16 +48,29 @@ class Home extends Core_Controller
 		
 	}
 
+    public function info()
+    {
+        $this->load->model('Dat_model','dat');
+        $d = $this->dat->getImage('011301427430001','ANGULARFRONT');
+        prex($d);
+    }
+
 	public function getBannerTime()
 	{
 	 	$bannerInformation = $this->Global_model->getBanner();
 	 	print $bannerInformation->date;
 	}
 
-	public function test($vin)
-	{
-		$this->load->model('Dat_model','dat');
-		$data = $this->dat->getVinRequest($vin);
-		prex($data);
-	}
+    public function my_404()
+    {
+        $data = new StdClass;
+        
+        $data = $this->Global_model->getAllInsert();
+
+        $this->output->set_status_header('404');
+        $this->load->view('head',$data);
+        $this->load->view('header');
+        $this->load->view('404');
+        $this->load->view('footer');
+    }
 }

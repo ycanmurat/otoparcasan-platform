@@ -50,7 +50,8 @@ class Category_model extends Core_Model
 	{
 		//prex($getAllPosts);
 		$dvns = array();
-		if (!empty(trim($getAllPosts->dvn))) {
+        //pre($getAllPosts);
+        if (isset($getAllPosts->dvn)) {
 			if (strpos($getAllPosts->dvn,',')) {
 				$dvnParse = explode(',', $getAllPosts->dvn);
 				foreach ($dvnParse as $key => $val) {
@@ -66,7 +67,6 @@ class Category_model extends Core_Model
 			$this->db->insert_batch('datDvnKod3',$dvns);
 			//pre($getAllPosts);
 			//prex($dvns);
-
 		}
 
 
