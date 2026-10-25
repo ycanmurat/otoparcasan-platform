@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" width="1000" height="500" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#7AA2FF"/>
+    </marker>
+    <style>
+      .box{fill:#1b1d22;stroke:#30343c;stroke-width:1}
+      .panel{fill:#15171b;stroke:#2c3038;stroke-width:1}
+      .t{fill:#f2f2f2;font-size:14px;font-weight:600}
+      .s{fill:#9aa0aa;font-size:11.5px}
+      .k{fill:#FF9D09;font-size:11px;font-weight:700;letter-spacing:.08em}
+      .l{fill:#7AA2FF;font-size:11px;font-weight:600}
+      .e{stroke:#7AA2FF;stroke-width:1.6;fill:none}
+      .pill{fill:#1e2533;stroke:#3a4a6b;stroke-width:1}
+      .pt{fill:#dfe6ff;font-size:11.5px;font-weight:600}
+    </style>
+  </defs>
+  <rect width="1000" height="500" rx="16" fill="#101114"/>
+  <text x="32" y="42" fill="#ffffff" font-size="18" font-weight="700">Otoparçasan · system architecture</text>
+  <text x="32" y="64" class="s">Storefront and back office on CodeIgniter 3, catalogue and stock from the Netsis ERP, vehicle data from DAT</text>
+
+  <!-- clients -->
+  <rect class="box" x="32" y="112" width="200" height="64" rx="10"/>
+  <text x="48" y="139" class="t">Customers</text>
+  <text x="48" y="159" class="s">Storefront · jQuery · Bootstrap 4</text>
+  <rect class="box" x="32" y="200" width="200" height="64" rx="10"/>
+  <text x="48" y="227" class="t">Operations team</text>
+  <text x="48" y="247" class="s">Back office · Metronic admin</text>
+
+  <!-- core app -->
+  <rect class="panel" x="272" y="92" width="376" height="236" rx="12"/>
+  <text x="290" y="116" class="k">STOREFRONT + ADMIN · CODEIGNITER 3.1</text>
+  <rect class="box" x="292" y="134" width="150" height="64" rx="10"/>
+  <text x="308" y="161" class="t">62 controllers</text>
+  <text x="308" y="181" class="s">storefront + Admin/</text>
+  <rect class="box" x="478" y="134" width="150" height="64" rx="10"/>
+  <text x="494" y="161" class="t">62 models</text>
+  <text x="494" y="181" class="s">orders · catalogue · DAT</text>
+  <rect class="box" x="292" y="236" width="150" height="64" rx="10"/>
+  <text x="308" y="263" class="t">Cron jobs</text>
+  <text x="308" y="283" class="s">SMS · email · push</text>
+  <!-- MySQL cylinder -->
+  <path d="M478 238 a75 10 0 0 0 150 0 v52 a75 10 0 0 1 -150 0 z" fill="#1b1d22" stroke="#30343c"/>
+  <ellipse cx="553" cy="238" rx="75" ry="10" fill="#22252b" stroke="#30343c"/>
+  <text x="553" y="272" text-anchor="middle" class="t">MySQL</text>
+  <text x="553" y="290" text-anchor="middle" class="s">~97 tables</text>
+
+  <!-- ERP bridge -->
+  <rect class="panel" x="688" y="92" width="280" height="160" rx="12"/>
+  <text x="706" y="116" class="k">ERP BRIDGE · CI 3 + SQLSRV</text>
+  <rect class="box" x="706" y="126" width="244" height="50" rx="8"/>
+  <text x="722" y="147" class="t" font-size="13">JSON endpoints</text>
+  <text x="722" y="165" class="s">categories · products · OEM lookup</text>
+  <path d="M752 200 a76 9 0 0 0 152 0 v30 a76 9 0 0 1 -152 0 z" fill="#1b1d22" stroke="#30343c"/>
+  <ellipse cx="828" cy="200" rx="76" ry="9" fill="#22252b" stroke="#30343c"/>
+  <text x="828" y="229" text-anchor="middle" class="t" font-size="13">Netsis ERP · MS SQL</text>
+  <line x1="828" y1="176" x2="828" y2="189" class="e" marker-end="url(#arrow)"/>
+
+  <!-- external services -->
+  <rect class="panel" x="688" y="272" width="280" height="200" rx="12"/>
+  <text x="706" y="296" class="k">EXTERNAL SERVICES</text>
+  <g>
+    <rect class="box" x="706" y="308" width="244" height="34" rx="8"/><text x="720" y="330" class="t" font-size="12.5">DAT <tspan class="s">VIN · vehicle tree · OEM · SOAP</tspan></text>
+    <rect class="box" x="706" y="348" width="244" height="34" rx="8"/><text x="720" y="370" class="t" font-size="12.5">iyzico · PayTR <tspan class="s">payments · REST</tspan></text>
+    <rect class="box" x="706" y="388" width="244" height="34" rx="8"/><text x="720" y="410" class="t" font-size="12.5">TurkKEP <tspan class="s">e-Invoice · SOAP</tspan></text>
+    <rect class="box" x="706" y="428" width="244" height="34" rx="8"/><text x="720" y="450" class="t" font-size="12.5">Mailgun · Netgsm <tspan class="s">email · SMS</tspan></text>
+  </g>
+
+  <!-- edges -->
+  <path d="M232 144 H262 V160 H292" class="e" marker-end="url(#arrow)"/>
+  <path d="M232 232 H262 V174 H292" class="e" marker-end="url(#arrow)"/>
+  <line x1="442" y1="166" x2="478" y2="166" class="e" marker-end="url(#arrow)"/>
+  <path d="M442 268 H460 V186 H478" class="e" marker-end="url(#arrow)"/>
+  <line x1="553" y1="198" x2="553" y2="226" class="e" marker-end="url(#arrow)"/>
+  <path d="M628 150 H706" class="e" marker-end="url(#arrow)"/>
+  <text x="666" y="138" class="l" text-anchor="middle">HTTP/JSON</text>
+  <path d="M628 182 H664 V325 H706" class="e" marker-end="url(#arrow)"/>
+  <text x="678" y="262" class="l" transform="rotate(-90 678 262)" text-anchor="middle">SOAP · REST</text>
+
+  <!-- fulfilment strip -->
+  <rect class="panel" x="32" y="352" width="616" height="120" rx="12"/>
+  <text x="50" y="376" class="k">ORDER-LINE FULFILMENT</text>
+  <g>
+    <rect class="pill" x="50" y="392" width="84" height="44" rx="8"/><text x="92" y="410" class="pt" text-anchor="middle">Payment</text><text x="92" y="426" class="pt" text-anchor="middle">confirmed</text>
+    <rect class="pill" x="148" y="392" width="84" height="44" rx="8"/><text x="190" y="410" class="pt" text-anchor="middle">Supplier</text><text x="190" y="426" class="pt" text-anchor="middle">approval</text>
+    <rect class="pill" x="246" y="392" width="84" height="44" rx="8"/><text x="288" y="410" class="pt" text-anchor="middle">Awaiting</text><text x="288" y="426" class="pt" text-anchor="middle">goods</text>
+    <rect class="pill" x="344" y="392" width="84" height="44" rx="8"/><text x="386" y="410" class="pt" text-anchor="middle">Goods</text><text x="386" y="426" class="pt" text-anchor="middle">received</text>
+    <rect class="pill" x="442" y="392" width="84" height="44" rx="8"/><text x="484" y="410" class="pt" text-anchor="middle">Ready</text><text x="484" y="426" class="pt" text-anchor="middle">to ship</text>
+    <rect class="pill" x="540" y="392" width="90" height="44" rx="8" style="fill:#2a2113;stroke:#FF9D09"/><text x="585" y="419" class="pt" text-anchor="middle" style="fill:#FFC266">Shipped</text>
+    <line x1="134" y1="414" x2="146" y2="414" class="e" marker-end="url(#arrow)"/>
+    <line x1="232" y1="414" x2="244" y2="414" class="e" marker-end="url(#arrow)"/>
+    <line x1="330" y1="414" x2="342" y2="414" class="e" marker-end="url(#arrow)"/>
+    <line x1="428" y1="414" x2="440" y2="414" class="e" marker-end="url(#arrow)"/>
+    <line x1="526" y1="414" x2="538" y2="414" class="e" marker-end="url(#arrow)"/>
+  </g>
+  <text x="50" y="458" class="s">Supplier approvals batched by supplier + SKU · order moves on when all its live lines match</text>
+</svg>
